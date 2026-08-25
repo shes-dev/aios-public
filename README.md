@@ -10,11 +10,9 @@ ChatGPT plans -> Cursor executes -> ChatGPT reviews -> queue.md moves forward
 
 No app. No server. No CLI. Just git and markdown files.
 
-AIOS supports two setups. Both use the same loop. **Single-repository** is the default. A separate **builder** repository is optional when you already have a product repo and want planning history kept out of it. See [Topology](protocol/TOPOLOGY.md).
-
 ## Start
 
-Use this path for a new project, or when protocol and product should share one GitHub repository.
+This is the default path: one repository.
 
 1. Clone this repo.
 2. Open ChatGPT and connect it to this GitHub repo.
@@ -29,21 +27,24 @@ Tell ChatGPT:
 This repo uses AIOS. Read the README and protocol. We are starting a new project. Create anything missing when the workflow needs it.
 ```
 
-## Existing product
+## Existing project
 
-Use this path when `<PRODUCT_REPOSITORY>` already exists and you want a dedicated `<PRODUCT_REPOSITORY>-builder` workspace.
+If you already have a product repository and want AIOS planning kept separate from product code, use a builder repository. That path is optional. Single-repository AIOS remains valid.
 
-That is a Human Git setup plus Human tool connection, then the normal Architect/Executor loop. AIOS cannot create the builder repo or attach ChatGPT/Cursor for you.
+```text
+aios-public
+    ↓ protocol/template source
+<project>-builder
+    ↓ approved tasks / project knowledge
+<project>
+```
 
-Follow [Initialize AIOS for an existing project](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md). In short:
+Full copy/paste bootstrap, remotes, ownership, and first-task flow:
 
-1. Create an independent builder repo. Keep `origin` on the builder. Add `aios-public` as a secondary remote and pull this protocol into the builder.
-2. Connect **both** the builder and the product repositories in ChatGPT and in Cursor. Open Cursor on the **builder**.
-3. Ask ChatGPT (Architect) to create the first builder task and update builder `queue.md`.
-4. Tell Cursor `execute 0001`. Cursor inspects the product read-only, writes builder files, and does not change product behavior during bootstrap.
-5. Commit, push, and tell ChatGPT `review 0001`.
+- [Existing-project initialization](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md)
+- [Repository topologies](protocol/TOPOLOGY.md)
 
-Do not start product implementation until that review passes.
+The human must connect both the builder and the product in ChatGPT and in Cursor. AIOS cannot do that automatically.
 
 ## The Loop
 
@@ -59,6 +60,8 @@ Do not start product implementation until that review passes.
 10. Tell ChatGPT: **review 0001**.
 11. ChatGPT writes the review and updates `queue.md`.
 12. When accepted, ChatGPT moves the task to Completed.
+
+In the builder/product topology, the loop files live in the builder. Cursor changes the product only when the task says so.
 
 ## Files
 
@@ -77,7 +80,7 @@ ChatGPT creates runtime folders when needed.
 
 If `prompts/`, `suggestions/`, or `memory/` does not exist yet, ChatGPT creates it.
 
-In a builder/product setup these files live in the builder. See [Topology](protocol/TOPOLOGY.md).
+In the optional builder/product topology, these files live in the builder. The product repository keeps application code.
 
 ## Rule
 

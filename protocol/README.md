@@ -1,13 +1,5 @@
 # Operator Guide
 
-## Topologies
-
-Single-repository AIOS is the default. Builder/product separation is optional.
-
-Read [Topology](TOPOLOGY.md) for ownership, remotes, and tool connection.
-
-To adopt an existing product repo, follow [Initialize AIOS for an existing project](examples/INIT_EXISTING_PROJECT.prompt.example.md) instead of duplicating those commands here.
-
 ## Basic Loop
 
 1. Talk with ChatGPT.
@@ -19,6 +11,8 @@ To adopt an existing product repo, follow [Initialize AIOS for an existing proje
 7. Tell ChatGPT: `review 0001`.
 8. ChatGPT updates `queue.md`.
 
+That loop is the same in both topologies. See [Repository topologies](TOPOLOGY.md).
+
 ## Bootstrap
 
 ChatGPT creates missing runtime folders when needed:
@@ -28,6 +22,10 @@ prompts/
 suggestions/
 memory/
 ```
+
+For a **new** AIOS project, clone this protocol repository and use it as the single workspace. That is the default path in the root README.
+
+For an **existing** product repository, the optional builder path is [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
 
 ## Queue
 
@@ -43,6 +41,8 @@ Cursor does not edit it.
 # Blocked
 ```
 
+In the builder/product topology, this file lives in the builder.
+
 ## Task Files
 
 ```text
@@ -55,18 +55,18 @@ prompts/NNNN-slug.review.md    # written by ChatGPT
 
 Cursor executes the task and writes the response.
 
-That is all.
+Cursor does not edit `queue.md`.
 
-In a builder/product setup, Cursor is opened on the builder. Cursor modifies the product repository only when the active task says so.
+Cursor changes the product repository only when the task explicitly says so.
 
 ## ChatGPT Rule
 
 ChatGPT plans, reviews, documents, creates missing folders, and moves the queue.
 
-In a builder/product setup, ChatGPT owns the builder `queue.md` and writes prompts, reviews, and memory in the builder. `aios-public` stays generic.
+## Ownership
 
-## Tool connection
+Builder (or the single AIOS repo) owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, and project knowledge.
 
-Connecting GitHub, ChatGPT, and Cursor is a Human step. AIOS cannot authorize those tools.
+The product repository owns application, runtime, and deployment code.
 
-For two repositories, the Human must authorize both the builder and the product in the Architect environment and open Cursor on the builder with the product available for inspection.
+`aios-public` stays generic protocol/template source.

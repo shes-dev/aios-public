@@ -1,59 +1,92 @@
-# Example — Initialize AIOS for an existing project
+# Example — Initialize AIOS for an existing product repository
 
-This is the reusable bootstrap for an **existing** product repository plus a **separate** builder repository.
+This is a reusable example, not a live task.
 
-Single-repository AIOS is still valid. Use the root `README.md` Start section when protocol and product should share one repo. Use this example when you want product code isolated from AIOS planning history.
+Copy it into a builder as `prompts/0001-init-existing-project.prompt.md` after replacing every placeholder. Keep `aios-public` generic: do not add consumer-specific names or knowledge to the protocol repository.
 
-Replace every placeholder before running commands or creating a task:
+## Placeholders
 
-| Placeholder | Meaning | Example shape |
-|-------------|---------|---------------|
-| `<PRODUCT_REPOSITORY>` | Existing product GitHub repo | `owner/my-app` |
-| `<BUILDER_REPOSITORY>` | New builder GitHub repo | `owner/my-app-builder` |
-| `<AIOS_PUBLIC_REPOSITORY>` | AIOS protocol source | `owner/aios-public` |
-| `<OWNER>` | GitHub user or org | `owner` |
-| `<BUILDER_NAME>` | Builder repo name only | `my-app-builder` |
+Replace all of:
 
-Recommended builder name: `<product-repo-name>-builder`.
+- `<PRODUCT_REPOSITORY>` — existing GitHub product repo, for example `owner/app`
+- `<BUILDER_REPOSITORY>` — new builder repo, for example `owner/app-builder`
+- `<AIOS_PUBLIC_REPOSITORY>` — AIOS protocol source, for example `shes-dev/aios-public`
+- `<OWNER>` — GitHub owner for the builder
+- `<BUILDER_NAME>` — builder repository name, usually `<product>-builder`
 
-## Who does what
+## Goal
 
-| Step | Kind | Actor |
-|------|------|--------|
-| Create the empty builder GitHub repo | Git operation | Human |
-| Clone builder, add `aios-public` remote, pull protocol, push | Git operation | Human |
-| Inspect remotes (`origin` = builder, `aios-public` = protocol source) | Git operation | Human, then Executor verifies |
-| Attach GitHub for builder **and** product in ChatGPT | Tool connection | Human |
-| Open Cursor on the builder; make the product repo available | Tool connection | Human |
-| Create task `0001` and update builder `queue.md` | Architect | ChatGPT |
-| Tell Cursor `execute 0001` | Human | Human |
-| Inspect product read-only; write builder `memory/` baseline; do not change product behavior | Executor | Cursor |
-| Write `prompts/0001-….response.md` in the builder | Executor | Cursor |
-| Commit and push builder changes | Git operation | Human |
-| `review 0001` and update builder `queue.md` | Architect | ChatGPT |
+Adopt an existing product into AIOS using a separate builder repository.
 
-AIOS does not create repositories, attach connectors, or authorize tools automatically. Stop after bootstrap and wait for Architect review before any real product implementation.
+ChatGPT is Architect. Cursor is Executor. The product must stay unchanged during this initialization.
 
-## Expected remote topology
+## Topology
 
-On the builder, after bootstrap:
+```text
+aios-public
+    ↓ protocol/template source
+<project>-builder
+    ↓ approved tasks / project knowledge
+<project>
+```
+
+Single-repository AIOS remains valid. This example is the optional builder/product path.
+
+## Ownership
+
+- Builder owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, project knowledge, task prompts, Executor responses, and Architect reviews.
+- Product owns application, runtime, and deployment code.
+- `<AIOS_PUBLIC_REPOSITORY>` remains generic protocol/template source. Do not store consumer-specific knowledge there.
+
+Expected builder remotes when this task is done:
 
 ```text
 origin       -> <BUILDER_REPOSITORY>
 aios-public  -> <AIOS_PUBLIC_REPOSITORY>
 ```
 
-The product repository stays on its own `origin`. Do not rewrite product remotes during bootstrap. Do not point the builder's `origin` at `aios-public`.
+## Requirements
 
-## Human — Git operations
+1. Create or use the builder as an independent Git repository.
+2. Keep `origin` pointed at the builder.
+3. Add the AIOS protocol source under a secondary remote named `aios-public` (or equivalent).
+4. Never leave the builder's canonical `origin` pointing at `aios-public`.
+5. Inspect the product repository read-only. Do not change product behavior.
+6. Write a durable adoption baseline under builder `memory/`.
+7. Stop for Architect review before any real product implementation.
 
-Create the builder as an **independent** Git repository. Do **not** add a README, license, or gitignore on GitHub (`gh repo create` without `--add-readme`), so the clone starts empty.
+## Out of scope
 
-These commands work in macOS/Linux shells, Git Bash, and PowerShell. `<AIOS_PUBLIC_REPOSITORY>` is `owner/name` (for example `shes-dev/aios-public`).
+- Product features or behavior changes
+- Automatic repository creation by ChatGPT or Cursor
+- Automatic ChatGPT/Cursor connector authorization
+- Hosted AIOS, CLI, servers, or other machinery beyond git and markdown
 
-### PowerShell / Git Bash / macOS / Linux
+---
+
+## Step 1 — Create an empty builder
+
+**Kind:** Git operation (Human)
+
+Create the builder **empty**. Do not use `--add-readme`, a template, a license file, or any other initial commit. An initial commit on the builder will conflict when the protocol history is pulled.
+
+GitHub CLI (`gh`) plus git, PowerShell:
 
 ```powershell
+gh repo create <OWNER>/<BUILDER_NAME> --private --description "AIOS builder workspace for <PRODUCT_REPOSITORY>" --confirm
+git clone https://github.com/<OWNER>/<BUILDER_NAME>.git
+cd <BUILDER_NAME>
+git remote add aios-public https://github.com/<AIOS_PUBLIC_REPOSITORY>.git
+git fetch aios-public
+git checkout -b main
+git pull aios-public main --allow-unrelated-histories --no-edit
+git push -u origin main
+git remote -v
+```
+
+The same commands in bash / zsh / Git Bash:
+
+```bash
 gh repo create <OWNER>/<BUILDER_NAME> --private --description "AIOS builder workspace for <PRODUCT_REPOSITORY>"
 git clone https://github.com/<OWNER>/<BUILDER_NAME>.git
 cd <BUILDER_NAME>
@@ -65,108 +98,95 @@ git push -u origin main
 git remote -v
 ```
 
-`gh repo create` with a name and `--private` does not prompt. Do not pass `--add-readme`. Older GitHub CLI docs mentioned `--confirm`; current `gh` does not need it.
+Notes:
 
-If the clone is empty, `git checkout -b main` may fail because there is not yet a commit. In that case, after `git fetch aios-public`, use this instead of `checkout -b` + `pull`:
+- `--confirm` is accepted by current `gh` but deprecated. Passing `--private` already skips the interactive prompt.
+- If `main` already exists, use `git checkout main` instead of `git checkout -b main`.
+- If the clone has no commits yet and `git checkout -b main` fails, after `git fetch aios-public` run `git checkout -B main aios-public/main`, then `git push -u origin main`.
+- `--no-edit` avoids stopping for a merge-commit message.
+- SSH remotes are fine. The remote **names** must still be `origin` (builder) and `aios-public` (protocol source).
+- If `git pull` asks how to reconcile divergent branches, add `--no-rebase`. That should not happen on an empty builder.
 
-```powershell
-git checkout -B main aios-public/main
-git push -u origin main
-git remote -v
-```
-
-That still leaves `origin` on the builder and `aios-public` as a secondary remote. Shared history with the protocol source is useful; it does not make `aios-public` the canonical origin.
-
-If GitHub already created a README commit on the builder, keep the `git pull aios-public main --allow-unrelated-histories --no-edit` form and resolve any README conflict by keeping both files or preferring the protocol README.
-
-Confirm remotes before continuing:
+`git remote -v` must look like:
 
 ```text
-origin       https://github.com/<OWNER>/<BUILDER_NAME>.git
-aios-public  https://github.com/<AIOS_PUBLIC_REPOSITORY>.git
+aios-public  https://github.com/<AIOS_PUBLIC_REPOSITORY>.git (fetch)
+aios-public  https://github.com/<AIOS_PUBLIC_REPOSITORY>.git (push)
+origin       https://github.com/<OWNER>/<BUILDER_NAME>.git (fetch)
+origin       https://github.com/<OWNER>/<BUILDER_NAME>.git (push)
 ```
 
-SSH is fine if that is how you talk to GitHub. The remote **names** must still be `origin` (builder) and `aios-public` (protocol source).
+If `origin` points at `<AIOS_PUBLIC_REPOSITORY>`, stop and fix remotes before pushing. See `protocol/TOPOLOGY.md`.
 
-Clone or open `<PRODUCT_REPOSITORY>` separately if you do not already have it. Do not push to the product during bootstrap.
+Do not run `git clone https://github.com/<AIOS_PUBLIC_REPOSITORY>.git` and then treat that clone as the builder. That leaves `origin` on the protocol source.
 
-### Later protocol updates
+Later protocol updates from the builder:
 
-From the builder:
-
-```powershell
+```bash
 git fetch aios-public
 git merge aios-public/main
 ```
 
-## Human — tool connection
+## Step 2 — Inspect the product read-only
 
-Do this before asking ChatGPT or Cursor to work across repos. AIOS cannot do it for you.
+**Kind:** Git operation (Human or Executor)
 
-1. In ChatGPT, connect GitHub and make sure both `<BUILDER_REPOSITORY>` and `<PRODUCT_REPOSITORY>` are authorized. Attach GitHub on every turn that must read or write repo files.
-2. Open Cursor on the **builder** folder (`<BUILDER_NAME>`), not on `aios-public` and not on the product as the only root.
-3. Make `<PRODUCT_REPOSITORY>` available to Cursor without making it the AIOS workspace: second workspace folder, adjacent clone, or GitHub read access. Bootstrap inspects it read-only.
-4. Tell ChatGPT which GitHub remotes you created and that Cursor is opened on the builder.
+Clone or fetch `<PRODUCT_REPOSITORY>` separately. Do not push to it. Do not commit in it. Do not change application behavior.
 
-## Architect — first task
+Record only what is needed for the adoption baseline: default branch, layout, how the app is built/run, and obvious constraints.
 
-In the **builder**, ChatGPT:
+## Step 3 — Connect Architect and Executor tools
 
-1. Creates `prompts/`, `suggestions/`, and `memory/` if they do not exist.
-2. Writes `prompts/0001-existing-project-onboarding-bootstrap.prompt.md` using the prompt body below, with placeholders filled.
-3. Puts `0001` in the Active section of `queue.md`.
+**Kind:** Human tool-connection / authorization
 
-Then the Human tells Cursor:
+AIOS cannot connect ChatGPT or Cursor for you.
 
-```text
-execute 0001
-```
+Before any cross-repo task:
 
-Cursor may modify the product repository only when the task explicitly says so. This bootstrap task must **not** say so.
+1. In ChatGPT, connect/authorize **both** `<BUILDER_REPOSITORY>` and `<PRODUCT_REPOSITORY>`. Attach the GitHub connector when ChatGPT must read or write repo files.
+2. In Cursor, open the builder folder and add/open the product folder in the same workspace so the Executor can see both.
 
-After Cursor writes the response, the Human commits and pushes the builder. The Human tells ChatGPT `review 0001`. ChatGPT writes the review and updates the builder `queue.md`.
+Until both tools can see both repositories, do not start product implementation tasks.
 
----
+## Step 4 — Adoption baseline
 
-# Task 0001 — Existing-project onboarding bootstrap
+**Kind:** Executor, in the builder only
 
-Copy from here down into `prompts/0001-existing-project-onboarding-bootstrap.prompt.md` after filling placeholders.
+Create durable notes under builder `memory/`, for example `memory/adoption-baseline.md`.
 
-## Goal
+Include:
 
-Adopt `<PRODUCT_REPOSITORY>` into AIOS using builder `<BUILDER_REPOSITORY>` and protocol source `<AIOS_PUBLIC_REPOSITORY>`. Produce a durable adoption baseline in the builder. Do not change product behavior.
+- product and builder repository names
+- builder remotes (`origin` and `aios-public`)
+- protocol source used
+- product default branch and a short layout summary
+- confirmation that the product was not modified
 
-## Repositories
+Do not write this baseline into `<AIOS_PUBLIC_REPOSITORY>`.
 
-- Builder: `<BUILDER_REPOSITORY>` (this workspace; `origin`)
-- Protocol source: `<AIOS_PUBLIC_REPOSITORY>` (remote `aios-public`)
-- Product: `<PRODUCT_REPOSITORY>` (inspect only)
+## Step 5 — First numbered AIOS task
 
-## Requirements
+After initialization files exist in the builder:
 
-1. Verify builder remotes:
-   - `origin` → `<BUILDER_REPOSITORY>`
-   - `aios-public` → `<AIOS_PUBLIC_REPOSITORY>`
-   - `origin` is not `<AIOS_PUBLIC_REPOSITORY>`
-2. Inspect `<PRODUCT_REPOSITORY>` read-only (clone, second workspace root, or `gh repo view`). Do not commit, push, or change product files.
-3. Create a durable adoption baseline under builder `memory/`, including at least:
-   - product name, default branch, and apparent purpose;
-   - builder/product/`aios-public` ownership split;
-   - confirmed remotes;
-   - that product behavior was not changed.
-4. Do not add product-specific knowledge to `<AIOS_PUBLIC_REPOSITORY>`.
-5. Do not implement product features.
-6. Stop for Architect review. Do not start a product implementation task.
+1. **Architect:** create the first numbered task in the builder (`prompts/0001-*.prompt.md`) and update builder `queue.md`.
+2. **Human:** pull the builder locally if needed, then tell Cursor `execute 0001` (or the applicable task id).
+3. **Executor:** do the work. Modify the product repository only when that task explicitly says so. Write `prompts/0001-*.response.md` in the builder. Do not edit `queue.md`.
+4. **Human:** commit and push the builder (and the product, if the task changed it).
+5. **Architect:** review, write `prompts/0001-*.review.md`, and update builder `queue.md`.
 
-## Out Of Scope
+This is the normal loop: `Talk -> Document -> Task -> Cursor executes -> Review -> Done`.
 
-- Product feature work
-- Hosted AIOS, servers, CLIs, or automatic dispatch
-- Automatic GitHub repo creation or connector authorization
-- Editing `queue.md`
+## Step 6 — Stop
 
-## Response
+**Kind:** Executor must stop here
 
-Cursor writes `prompts/0001-existing-project-onboarding-bootstrap.response.md` in the builder.
+Do not start real product implementation in this initialization task.
 
-Cursor must not edit `queue.md`.
+Hand back to Architect review with:
+
+- builder `origin` on `<BUILDER_REPOSITORY>`
+- `aios-public` remote on `<AIOS_PUBLIC_REPOSITORY>`
+- adoption baseline in builder `memory/`
+- product repository unchanged
+
+Architect decides the first product-implementation task after that review.

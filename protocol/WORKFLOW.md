@@ -36,6 +36,10 @@ memory/
 
 Do not ask the human to create these folders manually.
 
+Single-repository bootstrap: clone this protocol repo and start talking to ChatGPT. See the root README.
+
+Existing-product bootstrap (optional builder/product split): see [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md) and [Repository topologies](TOPOLOGY.md).
+
 ## Task Flow
 
 1. Human talks with ChatGPT.
@@ -50,6 +54,13 @@ Do not ask the human to create these folders manually.
 10. Human tells ChatGPT: `review 0001`.
 11. ChatGPT writes the review and updates `queue.md`.
 12. If accepted, ChatGPT moves the task to Completed.
+
+In the builder/product topology:
+
+- steps 4–11 use the **builder** repository for queue, prompts, responses, and reviews
+- the human must already have connected both builder and product in ChatGPT and in Cursor
+- Cursor modifies the product repository only when the task explicitly says so
+- if the product changed, the human also commits and pushes the product repository
 
 ## Files
 
@@ -74,25 +85,6 @@ The human still tells Cursor only:
 ```text
 execute 0002
 ```
-
-## Step kinds
-
-| Kind | Who |
-|------|-----|
-| Git operation | Human |
-| Tool connection / authorization | Human |
-| Architect (plan, document, task, review, queue) | ChatGPT |
-| Executor (implement, response file) | Cursor |
-
-AIOS does not create GitHub repositories or attach ChatGPT/Cursor connectors.
-
-## Two repositories
-
-Optional. Product code can stay in `<PRODUCT_REPOSITORY>` while AIOS files live in `<BUILDER_REPOSITORY>`. Protocol updates come from the `aios-public` remote, not from retargeting `origin`.
-
-Full bootstrap: [Initialize AIOS for an existing project](examples/INIT_EXISTING_PROJECT.prompt.example.md). Ownership and remotes: [Topology](TOPOLOGY.md).
-
-The loop is unchanged. Cursor runs from the builder. Cursor changes the product repository only when the task says so. Cursor still does not edit `queue.md`.
 
 ## Suggestions
 

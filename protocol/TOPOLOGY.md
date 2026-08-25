@@ -1,24 +1,25 @@
-# Topology
+# Repository topologies
 
-AIOS can live in one repository or two. The loop does not change:
+AIOS supports two topologies.
 
-```text
-Talk -> Document -> Task -> Cursor executes -> Review -> Done
-```
-
-Git and Markdown remain the coordination mechanism. ChatGPT remains Architect. Cursor remains Executor. Cursor does not edit `queue.md`.
+Single-repository AIOS is the default. Builder/product separation is optional.
 
 ## Single repository
 
-The default. Protocol, queue, prompts, and product code share one `origin`.
+Clone `aios-public` and use that clone as the project workspace.
 
-Use this when you are starting a new project, or when you want planning history next to the product code.
+```text
+aios-public clone
+  queue.md + prompts + product code in one repository
+```
 
-See the root `README.md` Start section.
+ChatGPT, Cursor, and the human all work in that one repository.
+
+This is the path in the root README under **Start**.
 
 ## Builder and product
 
-Optional. Use this when a product repository already exists and you want AIOS planning, tasks, and reviews kept out of the product history.
+Use this when the product repository already exists and you want AIOS planning and history kept out of the product repo.
 
 ```text
 aios-public
@@ -28,71 +29,70 @@ aios-public
 <project>
 ```
 
-| Repository | Role |
-|------------|------|
-| `<AIOS_PUBLIC_REPOSITORY>` | Generic protocol and template source. Not the builder's `origin`. Contains no consumer-specific knowledge. |
-| `<BUILDER_REPOSITORY>` | Independent AIOS workspace. Canonical `origin`. Owns queue, prompts, suggestions, memory, responses, and reviews. |
-| `<PRODUCT_REPOSITORY>` | Application, runtime, and deployment code. Unchanged until a task explicitly allows product edits. |
-
-Single-repository AIOS remains valid. Do not treat builder/product separation as required.
+`aios-public` stays generic. It is the protocol/template source, not the builder's primary origin, and not a place for consumer-specific knowledge.
 
 ## Ownership
 
-| Path | Repository | Writer |
-|------|------------|--------|
-| `queue.md` | builder | ChatGPT only |
-| `prompts/*.prompt.md` | builder | ChatGPT |
-| `prompts/*.response.md` | builder | Cursor |
-| `prompts/*.review.md` | builder | ChatGPT |
-| `suggestions/` | builder | ChatGPT |
-| `memory/` | builder | ChatGPT; Cursor only when a task says so |
-| `protocol/` | builder, pulled from `aios-public` | Updated by merging the `aios-public` remote |
-| application / runtime / deployment code | product | Cursor, and only when the active task says so |
+The **builder** owns:
 
-`aios-public` stays generic. Consumer architecture, secrets, and product names belong in the builder `memory/` or the product repository, not in `aios-public`.
+- `queue.md`
+- `prompts/`
+- `suggestions/`
+- `memory/`
+- project architecture and operating knowledge
+- task prompts, Executor responses, and Architect reviews
+
+The **product** repository owns:
+
+- application, runtime, and deployment code
+- implementation changes
+
+Cursor may change the product repository only when the active task explicitly says so.
 
 ## Builder remotes
 
-After bootstrap the builder remotes must be:
+After bootstrap, the builder remotes must be:
 
 ```text
 origin       -> <BUILDER_REPOSITORY>
 aios-public  -> <AIOS_PUBLIC_REPOSITORY>
 ```
 
-Never leave the builder's canonical `origin` pointing at `aios-public`. Later protocol updates are:
+Never leave the builder's `origin` pointing at `aios-public`.
+
+If you cloned `aios-public` by mistake and want that working copy to become a builder, fix the remotes before any push:
+
+```bash
+git remote rename origin aios-public
+git remote add origin https://github.com/<BUILDER_REPOSITORY>.git
+git remote -v
+git push -u origin main
+```
+
+Later protocol updates stay on the secondary remote. Do not retarget `origin`:
 
 ```bash
 git fetch aios-public
 git merge aios-public/main
 ```
 
-## Tool connection
+## Who does what
 
-AIOS cannot create GitHub repositories, attach ChatGPT connectors, or open Cursor folders by itself.
+These roles are the same in both topologies. The optional two-repository path adds extra Git and Human connection steps.
 
-Before cross-repo work, the Human must:
+| Kind | Who | What |
+|------|-----|------|
+| Git operation | Human (or Executor when the task says so) | Create/clone the builder, set remotes, fetch protocol, push builder `main`, inspect the product read-only |
+| Human tool-connection | Human | Authorize/connect **both** the builder and the product in ChatGPT and in Cursor before cross-repo work. AIOS cannot do this automatically. |
+| Architect | ChatGPT | Plan, write task prompts, own `queue.md`, review responses |
+| Executor | Cursor | Execute the active task, write `prompts/*.response.md` in the builder, do not edit `queue.md` |
 
-1. Create or clone the builder with Git (see `protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md`).
-2. Connect **both** the builder and the product repositories in the Architect environment (ChatGPT with GitHub attached for each repo that must be read or written).
-3. Open Cursor on the **builder** folder. Make the product repository available read-only or as a second workspace root.
-4. Keep GitHub attached on Architect turns that read or write repo files.
+## First task after a builder exists
 
-## First task
+1. Architect creates the first numbered task in the builder and updates builder `queue.md`.
+2. Human tells Cursor `execute 0001` (or the applicable task id).
+3. Cursor changes the product repository only if that task says so.
+4. Cursor writes the response into the builder.
+5. Architect reviews and updates the builder queue.
 
-1. Architect writes `prompts/NNNN-slug.prompt.md` in the builder and updates the builder `queue.md`.
-2. Human tells Cursor `execute NNNN` (for example `execute 0001`).
-3. Cursor executes from the builder. Cursor modifies the product repository only when that task says so. Cursor writes the response in the builder. Cursor does not edit `queue.md`.
-4. Human commits and pushes the builder, and the product if it changed.
-5. Human tells ChatGPT `review NNNN`. Architect writes the review and updates the builder queue.
-
-## Step kinds
-
-Every onboarding step is one of:
-
-| Kind | Who | Examples |
-|------|-----|----------|
-| Git operation | Human (or Human-run CLI) | `gh repo create`, `git clone`, `git remote add`, `git pull`, `git push` |
-| Tool connection | Human | Attach GitHub in ChatGPT; open Cursor on the builder; authorize both repos |
-| Architect | ChatGPT | Create the first task; update `queue.md`; review |
-| Executor | Cursor | Execute the task; write the response; inspect product read-only unless the task says otherwise |
+See [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md) for the copy/paste bootstrap.

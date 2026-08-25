@@ -11,6 +11,8 @@
 7. Tell ChatGPT: `review 0001`.
 8. ChatGPT updates `queue.md`.
 
+That loop is the same in both topologies. See [Repository topologies](TOPOLOGY.md).
+
 ## Bootstrap
 
 ChatGPT creates missing runtime folders when needed:
@@ -20,6 +22,10 @@ prompts/
 suggestions/
 memory/
 ```
+
+For a **new** AIOS project, clone this protocol repository and use it as the single workspace. That is the default path in the root README.
+
+For an **existing** product repository, the optional builder path is [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
 
 ## Queue
 
@@ -35,6 +41,8 @@ Cursor does not edit it.
 # Blocked
 ```
 
+In the builder/product topology, this file lives in the builder.
+
 ## Task Files
 
 ```text
@@ -47,8 +55,18 @@ prompts/NNNN-slug.review.md    # written by ChatGPT
 
 Cursor executes the task and writes the response.
 
-That is all.
+Cursor does not edit `queue.md`.
+
+Cursor changes the product repository only when the task explicitly says so.
 
 ## ChatGPT Rule
 
 ChatGPT plans, reviews, documents, creates missing folders, and moves the queue.
+
+## Ownership
+
+Builder (or the single AIOS repo) owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, and project knowledge.
+
+The product repository owns application, runtime, and deployment code.
+
+`aios-public` stays generic protocol/template source.

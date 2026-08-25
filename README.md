@@ -12,6 +12,8 @@ No app. No server. No CLI. Just git and markdown files.
 
 ## Start
 
+This is the default path: one repository.
+
 1. Clone this repo.
 2. Open ChatGPT and connect it to this GitHub repo.
 3. Open Cursor on the cloned repo folder.
@@ -24,6 +26,25 @@ Tell ChatGPT:
 ```text
 This repo uses AIOS. Read the README and protocol. We are starting a new project. Create anything missing when the workflow needs it.
 ```
+
+## Existing project
+
+If you already have a product repository and want AIOS planning kept separate from product code, use a builder repository. That path is optional. Single-repository AIOS remains valid.
+
+```text
+aios-public
+    ↓ protocol/template source
+<project>-builder
+    ↓ approved tasks / project knowledge
+<project>
+```
+
+Full copy/paste bootstrap, remotes, ownership, and first-task flow:
+
+- [Existing-project initialization](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md)
+- [Repository topologies](protocol/TOPOLOGY.md)
+
+The human must connect both the builder and the product in ChatGPT and in Cursor. AIOS cannot do that automatically.
 
 ## The Loop
 
@@ -39,6 +60,8 @@ This repo uses AIOS. Read the README and protocol. We are starting a new project
 10. Tell ChatGPT: **review 0001**.
 11. ChatGPT writes the review and updates `queue.md`.
 12. When accepted, ChatGPT moves the task to Completed.
+
+In the builder/product topology, the loop files live in the builder. Cursor changes the product only when the task says so.
 
 ## Files
 
@@ -56,6 +79,8 @@ ChatGPT creates runtime folders when needed.
 | `memory/` | ChatGPT | Decisions worth keeping |
 
 If `prompts/`, `suggestions/`, or `memory/` does not exist yet, ChatGPT creates it.
+
+In the optional builder/product topology, these files live in the builder. The product repository keeps application code.
 
 ## Rule
 

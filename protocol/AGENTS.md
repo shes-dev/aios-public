@@ -45,9 +45,10 @@ The human:
 
 1. Talks to ChatGPT.
 2. Pulls ChatGPT changes locally.
-3. Opens Cursor on the repo folder.
+3. Opens Cursor on the repo folder (the builder folder in a two-repo setup).
 4. Commits and pushes Cursor's work.
 5. Asks ChatGPT to review.
+6. Connects GitHub, ChatGPT, and Cursor to each repository that must be used. AIOS cannot do this automatically.
 
 ## Files
 
@@ -59,3 +60,9 @@ The human:
 | `prompts/*.review.md` | ChatGPT | Review verdict |
 | `suggestions/` | ChatGPT | Documented ideas before tasks |
 | `memory/` | ChatGPT | Durable project knowledge |
+
+This ownership does not change in a builder/product setup. The files above live in the **builder**. Product application code lives in the product repository. Cursor edits the product only when a task explicitly says so.
+
+`aios-public` is the generic protocol source. Consumer-specific knowledge belongs in the builder (`memory/`, prompts, reviews) or in the product repository, not in `aios-public`.
+
+Optional topology, remotes, and Human tool-connection steps: [Topology](TOPOLOGY.md). Existing-product bootstrap: [Initialize AIOS for an existing project](examples/INIT_EXISTING_PROJECT.prompt.example.md).

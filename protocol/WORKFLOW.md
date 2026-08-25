@@ -75,6 +75,25 @@ The human still tells Cursor only:
 execute 0002
 ```
 
+## Step kinds
+
+| Kind | Who |
+|------|-----|
+| Git operation | Human |
+| Tool connection / authorization | Human |
+| Architect (plan, document, task, review, queue) | ChatGPT |
+| Executor (implement, response file) | Cursor |
+
+AIOS does not create GitHub repositories or attach ChatGPT/Cursor connectors.
+
+## Two repositories
+
+Optional. Product code can stay in `<PRODUCT_REPOSITORY>` while AIOS files live in `<BUILDER_REPOSITORY>`. Protocol updates come from the `aios-public` remote, not from retargeting `origin`.
+
+Full bootstrap: [Initialize AIOS for an existing project](examples/INIT_EXISTING_PROJECT.prompt.example.md). Ownership and remotes: [Topology](TOPOLOGY.md).
+
+The loop is unchanged. Cursor runs from the builder. Cursor changes the product repository only when the task says so. Cursor still does not edit `queue.md`.
+
 ## Suggestions
 
 Use suggestions when the discussion is useful but not ready for implementation.

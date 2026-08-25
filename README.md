@@ -10,7 +10,11 @@ ChatGPT plans -> Cursor executes -> ChatGPT reviews -> queue.md moves forward
 
 No app. No server. No CLI. Just git and markdown files.
 
+AIOS supports two setups. Both use the same loop. **Single-repository** is the default. A separate **builder** repository is optional when you already have a product repo and want planning history kept out of it. See [Topology](protocol/TOPOLOGY.md).
+
 ## Start
+
+Use this path for a new project, or when protocol and product should share one GitHub repository.
 
 1. Clone this repo.
 2. Open ChatGPT and connect it to this GitHub repo.
@@ -24,6 +28,22 @@ Tell ChatGPT:
 ```text
 This repo uses AIOS. Read the README and protocol. We are starting a new project. Create anything missing when the workflow needs it.
 ```
+
+## Existing product
+
+Use this path when `<PRODUCT_REPOSITORY>` already exists and you want a dedicated `<PRODUCT_REPOSITORY>-builder` workspace.
+
+That is a Human Git setup plus Human tool connection, then the normal Architect/Executor loop. AIOS cannot create the builder repo or attach ChatGPT/Cursor for you.
+
+Follow [Initialize AIOS for an existing project](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md). In short:
+
+1. Create an independent builder repo. Keep `origin` on the builder. Add `aios-public` as a secondary remote and pull this protocol into the builder.
+2. Connect **both** the builder and the product repositories in ChatGPT and in Cursor. Open Cursor on the **builder**.
+3. Ask ChatGPT (Architect) to create the first builder task and update builder `queue.md`.
+4. Tell Cursor `execute 0001`. Cursor inspects the product read-only, writes builder files, and does not change product behavior during bootstrap.
+5. Commit, push, and tell ChatGPT `review 0001`.
+
+Do not start product implementation until that review passes.
 
 ## The Loop
 
@@ -56,6 +76,8 @@ ChatGPT creates runtime folders when needed.
 | `memory/` | ChatGPT | Decisions worth keeping |
 
 If `prompts/`, `suggestions/`, or `memory/` does not exist yet, ChatGPT creates it.
+
+In a builder/product setup these files live in the builder. See [Topology](protocol/TOPOLOGY.md).
 
 ## Rule
 

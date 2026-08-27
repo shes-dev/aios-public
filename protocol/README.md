@@ -17,9 +17,11 @@ ChatGPT + Cursor assignment:
 
 Claude-only assignment: tell one Claude session the same commands in order (`document this`, `execute 0001`, `review 0001`). Keep separate prompt, response, and review files.
 
-That loop is the same in both topologies. See [Repository topologies](TOPOLOGY.md).
+That loop is the same in both topologies. Canonical stage-1 topology and adopt/reuse/create rules: [Repository topologies](TOPOLOGY.md), [Bootstrap](BOOTSTRAP.md).
 
 ## Bootstrap
+
+Canonical stage-1 bootstrap is product + builder with reuse-before-create. See [Bootstrap](BOOTSTRAP.md).
 
 The Architect creates missing runtime folders when needed:
 
@@ -29,9 +31,9 @@ suggestions/
 memory/
 ```
 
-For a **new** AIOS project, clone this protocol repository and use it as the single workspace. That is the default path in the root README.
+For a **new** or **existing** project, follow [Bootstrap](BOOTSTRAP.md) before creating any GitHub repository. Single-repository clone of this protocol repo remains valid; it is not the Claude stage-1 default.
 
-For an **existing** product repository, the optional builder path is [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
+The git sequence for an existing product and a missing builder is [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
 
 ## Queue
 

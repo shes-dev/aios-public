@@ -1,6 +1,8 @@
 # Example — Initialize AIOS for an existing product repository
 
-This is a reusable example, not a live task.
+This is a reusable git example, not a live task, and not the adopt/create decision table.
+
+**Run [Bootstrap](../BOOTSTRAP.md) first.** Use this sequence only when the product already exists, no matching builder exists, and the Human has authorized builder creation. If a matching builder already exists, reuse it; do not run Step 1.
 
 Copy it into a builder as `prompts/0001-init-existing-project.prompt.md` after replacing every placeholder. Keep `aios-public` generic: do not add consumer-specific names or knowledge to the protocol repository.
 
@@ -30,7 +32,7 @@ aios-public
 <project>
 ```
 
-Single-repository AIOS remains valid. This example is the optional builder/product path.
+Single-repository AIOS remains valid. This example is the existing-product git path for the canonical builder/product topology.
 
 ## Ownership
 
@@ -47,7 +49,7 @@ aios-public  -> <AIOS_PUBLIC_REPOSITORY>
 
 ## Requirements
 
-1. Create or use the builder as an independent Git repository.
+1. Reuse a matching builder if one exists. Create an independent builder repository only when [Bootstrap](../BOOTSTRAP.md) says none exists and creation is authorized.
 2. Keep `origin` pointed at the builder.
 3. Add the AIOS protocol source under a secondary remote named `aios-public` (or equivalent).
 4. Never leave the builder's canonical `origin` pointing at `aios-public`.
@@ -64,9 +66,9 @@ aios-public  -> <AIOS_PUBLIC_REPOSITORY>
 
 ---
 
-## Step 1 — Create an empty builder
+## Step 1 — Create an empty builder (only if none exists)
 
-**Kind:** Git operation (Human)
+**Kind:** Git operation (Human), and only after [Bootstrap](../BOOTSTRAP.md) says the matching builder is missing.
 
 Create the builder **empty**. Do not use `--add-readme`, a template, a license file, or any other initial commit. An initial commit on the builder will conflict when the protocol history is pulled.
 

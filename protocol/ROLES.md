@@ -80,4 +80,4 @@ Git remotes, tool connection, and commits/pushes remain Human operations unless 
 
 ## What this file is not
 
-This file is the role contract only. Onboarding copy, repository bootstrap, and topology are documented elsewhere and are unchanged by this contract.
+This file is the role contract only. Onboarding copy lives in the root README (follow-up). Stage-1 adopt/reuse/create lives in [Bootstrap](BOOTSTRAP.md).

@@ -36,11 +36,13 @@ suggestions/
 memory/
 ```
 
-Do not ask the human to create these folders manually.
+Do not ask the Human to create these folders manually.
 
-Single-repository bootstrap: clone this protocol repo and start talking to the Architect. See the root README.
+Canonical stage-1 product/builder bootstrap: [Bootstrap](BOOTSTRAP.md) and [Repository topologies](TOPOLOGY.md).
 
-Existing-product bootstrap (optional builder/product split): see [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md) and [Repository topologies](TOPOLOGY.md).
+Single-repository bootstrap remains valid: clone this protocol repo and start talking to the Architect. See the root README until that onboarding page is rewritten.
+
+Existing-product git sequence when a matching builder does **not** already exist: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
 
 ## Task Flow
 

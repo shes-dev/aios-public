@@ -1,12 +1,27 @@
 # Repository topologies
 
-AIOS supports two topologies.
+The canonical AIOS stage-1 topology is product + builder, with `aios-public` as protocol source.
 
-Single-repository AIOS is the default. Builder/product separation is optional.
+Adopt, reuse, and create rules: [Bootstrap](BOOTSTRAP.md).
+
+## Default: builder and product
+
+```text
+aios-public
+    ↓ protocol source
+<project>-builder
+    ↓ AIOS workspace
+<project>
+    ↓ product implementation
+```
+
+`aios-public` stays generic. It is the protocol/template source, not the builder's primary origin, and not a place for consumer-specific knowledge.
+
+The builder is the AIOS workspace. The product is implementation code. Reuse an existing matching builder; create `<product-repo-name>-builder` only when none exists and creation is authorized.
 
 ## Single repository
 
-Clone `aios-public` and use that clone as the project workspace.
+Still valid when protocol and product should share one `origin`. Not the Claude stage-1 default.
 
 ```text
 aios-public clone
@@ -15,21 +30,7 @@ aios-public clone
 
 ChatGPT, Cursor, or one Claude session, plus the Human, all work in that one repository.
 
-This is the path in the root README under **Start**.
-
-## Builder and product
-
-Use this when the product repository already exists and you want AIOS planning and history kept out of the product repo.
-
-```text
-aios-public
-    ↓ protocol/template source
-<project>-builder
-    ↓ approved tasks / project knowledge
-<project>
-```
-
-`aios-public` stays generic. It is the protocol/template source, not the builder's primary origin, and not a place for consumer-specific knowledge.
+The root README still describes this path until the onboarding README task rewrites it.
 
 ## Ownership
 
@@ -46,6 +47,7 @@ The **product** repository owns:
 
 - application, runtime, and deployment code
 - implementation changes
+- existing Git history and branches (never rewritten during adoption)
 
 The Executor may change the product repository only when the active task explicitly says so.
 
@@ -78,11 +80,11 @@ git merge aios-public/main
 
 ## Who does what
 
-These roles are the same in both topologies. Who plays them is defined in [Roles](ROLES.md). One Claude session may perform Architect, Executor, and Reviewer sequentially. ChatGPT + Cursor remains valid. The optional two-repository path adds extra Git and Human connection steps.
+These roles are the same in both topologies. Who plays them is defined in [Roles](ROLES.md). One Claude session may perform Architect, Executor, and Reviewer sequentially. ChatGPT + Cursor remains valid. The builder/product path adds extra Git and Human connection steps.
 
 | Kind | Who | What |
 |------|-----|------|
-| Git operation | Human (or Executor when the task says so) | Create/clone the builder, set remotes, fetch protocol, push builder `main`, inspect the product read-only |
+| Git operation | Human (or Executor when the task says so and creation is authorized) | Inspect first; reuse existing product/builder; create only if missing; set remotes; never rewrite product history |
 | Human tool-connection | Human | Authorize/connect **both** the builder and the product in the tools that will act as Architect, Executor, and Reviewer before cross-repo work. AIOS cannot do this automatically. |
 | Architect | Role | Plan, write task prompts, own `queue.md` |
 | Executor | Role | Execute the active task, write `prompts/*.response.md`, do not edit `queue.md` |
@@ -96,4 +98,4 @@ These roles are the same in both topologies. Who plays them is defined in [Roles
 4. Executor writes the response into the builder.
 5. Reviewer writes the review and updates the builder queue.
 
-See [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md) for the copy/paste bootstrap.
+Git sequence for an existing product and a **new** empty builder: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md). Run [Bootstrap](BOOTSTRAP.md) first so that sequence is used only when no matching builder exists.

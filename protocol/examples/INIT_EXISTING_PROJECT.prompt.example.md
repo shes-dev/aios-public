@@ -18,7 +18,7 @@ Replace all of:
 
 Adopt an existing product into AIOS using a separate builder repository.
 
-ChatGPT is Architect. Cursor is Executor. The product must stay unchanged during this initialization.
+Assign Architect and Executor per [Roles](../ROLES.md). ChatGPT as Architect and Cursor as Executor remains valid. One Claude session may perform both sequentially. The product must stay unchanged during this initialization.
 
 ## Topology
 
@@ -58,8 +58,8 @@ aios-public  -> <AIOS_PUBLIC_REPOSITORY>
 ## Out of scope
 
 - Product features or behavior changes
-- Automatic repository creation by ChatGPT or Cursor
-- Automatic ChatGPT/Cursor connector authorization
+- Automatic repository creation by Architect or Executor
+- Automatic tool connector authorization
 - Hosted AIOS, CLI, servers, or other machinery beyond git and markdown
 
 ---
@@ -139,12 +139,12 @@ Record only what is needed for the adoption baseline: default branch, layout, ho
 
 **Kind:** Human tool-connection / authorization
 
-AIOS cannot connect ChatGPT or Cursor for you.
+AIOS cannot connect Architect or Executor tools for you.
 
 Before any cross-repo task:
 
-1. In ChatGPT, connect/authorize **both** `<BUILDER_REPOSITORY>` and `<PRODUCT_REPOSITORY>`. Attach the GitHub connector when ChatGPT must read or write repo files.
-2. In Cursor, open the builder folder and add/open the product folder in the same workspace so the Executor can see both.
+1. Connect/authorize **both** `<BUILDER_REPOSITORY>` and `<PRODUCT_REPOSITORY>` in the tools that will act as Architect, Executor, and Reviewer.
+2. If Cursor is the Executor, open the builder folder and add/open the product folder in the same workspace. If one Claude session is playing every role, give that session access to both repositories.
 
 Until both tools can see both repositories, do not start product implementation tasks.
 
@@ -169,12 +169,12 @@ Do not write this baseline into `<AIOS_PUBLIC_REPOSITORY>`.
 After initialization files exist in the builder:
 
 1. **Architect:** create the first numbered task in the builder (`prompts/0001-*.prompt.md`) and update builder `queue.md`.
-2. **Human:** pull the builder locally if needed, then tell Cursor `execute 0001` (or the applicable task id).
+2. **Human:** pull the builder locally if needed, then tell the Executor `execute 0001` (or the applicable task id).
 3. **Executor:** do the work. Modify the product repository only when that task explicitly says so. Write `prompts/0001-*.response.md` in the builder. Do not edit `queue.md`.
 4. **Human:** commit and push the builder (and the product, if the task changed it).
-5. **Architect:** review, write `prompts/0001-*.review.md`, and update builder `queue.md`.
+5. **Reviewer:** review, write `prompts/0001-*.review.md`, and update builder `queue.md`.
 
-This is the normal loop: `Talk -> Document -> Task -> Cursor executes -> Review -> Done`.
+This is the normal loop: `Talk -> Document -> Task -> Execute -> Review -> Done`.
 
 ## Step 6 — Stop
 

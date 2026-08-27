@@ -2,7 +2,7 @@
 
 ## Goal
 
-What Cursor should accomplish.
+What the Executor should accomplish.
 
 ## Requirements
 
@@ -15,6 +15,6 @@ What Cursor should accomplish.
 
 ## Response
 
-Cursor writes `prompts/NNNN-slug.response.md` when done.
+The Executor writes `prompts/NNNN-slug.response.md` when done.
 
-Cursor must not edit `queue.md`.
+The Executor must not edit `queue.md`.

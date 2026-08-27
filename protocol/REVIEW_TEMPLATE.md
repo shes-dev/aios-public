@@ -12,7 +12,7 @@ What was reviewed and the result.
 
 ## Queue Update
 
-ChatGPT updates `queue.md` after this review.
+The Reviewer updates `queue.md` after this review.
 
 - [ ] Move to Completed
 - [ ] Create rework task

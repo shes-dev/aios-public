@@ -14,4 +14,4 @@ What changed.
 
 ## Notes
 
-Anything ChatGPT should know before review.
+Anything the Reviewer should know before review.

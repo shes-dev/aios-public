@@ -1,4 +1,4 @@
-<!-- ChatGPT manages this file. Cursor must not edit it. -->
+<!-- Architect owns this file. Reviewer updates it after a review. Executor must not edit it. -->
 
 # In Line
 

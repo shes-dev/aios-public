@@ -1,72 +1,106 @@
 # Agents
 
-AIOS does not connect ChatGPT and Cursor directly.
+AIOS coordinates a Human and three logical roles through git and markdown files.
 
-They work through git and markdown files.
+Roles, sequential Claude, and the ChatGPT + Cursor assignment are defined in [Roles](ROLES.md).
 
-## ChatGPT
+AIOS does not connect tools to each other. It does not require a different AI product for each role.
 
-ChatGPT is the planner and reviewer.
+## Architect
 
-ChatGPT:
+The Architect:
 
-1. Talks with the human.
+1. Talks with the Human.
 2. Documents useful discussion.
 3. Creates missing runtime folders when needed.
 4. Creates task prompts in `prompts/`.
-5. Updates `queue.md`.
-6. Reviews Cursor responses.
-7. Moves accepted tasks to Completed.
+5. Manages `suggestions/` and `memory/`.
+6. Owns `queue.md` state.
 
-ChatGPT is the only agent that should update `queue.md` during normal work.
+One Claude session may act as Architect. ChatGPT may act as Architect.
 
-If `prompts/`, `suggestions/`, or `memory/` does not exist yet, ChatGPT creates it instead of asking the human to do so.
+If `prompts/`, `suggestions/`, or `memory/` does not exist yet, the Architect creates it instead of asking the Human to do so.
 
-## Cursor
+## Executor
 
-Cursor is the executor.
-
-Cursor:
+The Executor:
 
 1. Reads `queue.md`.
-2. Executes the first Active task.
+2. Executes the current Active task.
 3. Writes `prompts/NNNN-slug.response.md`.
 4. Does not edit `queue.md`.
 5. Changes the product repository only when the task explicitly says so.
 
-The human should be able to tell Cursor only:
+One Claude session may act as Executor after it has finished Architect work for that task. Cursor may act as Executor.
+
+The Human should be able to say only:
 
 ```text
 execute 0001
 ```
 
-When the task does not say to change the product repository, Cursor inspects it read-only.
+When the task does not say to change the product repository, the Executor inspects it read-only.
+
+## Reviewer
+
+The Reviewer:
+
+1. Reviews the execution against the task.
+2. Writes `prompts/NNNN-slug.review.md`.
+3. Updates `queue.md` according to the result.
+
+One Claude session may act as Reviewer after it has finished Executor work for that task. ChatGPT may act as Reviewer.
+
+The Human should be able to say only:
+
+```text
+review 0001
+```
+
+## Sequential Claude
+
+One Claude session may perform Architect, then Executor, then Reviewer. That is a supported first-class mode.
+
+It must still use separate phases and separate artifacts. It must not merge the task, the response, and the review into one undocumented step. Details: [Roles](ROLES.md).
+
+## ChatGPT + Cursor
+
+This assignment remains valid:
+
+- ChatGPT is Architect and Reviewer.
+- Cursor is Executor.
+- Cursor does not edit `queue.md`.
+- ChatGPT updates `queue.md` as Architect and as Reviewer.
 
 ## Human
 
-The human:
+The Human:
 
-1. Talks to ChatGPT.
-2. Pulls ChatGPT changes locally.
-3. Opens Cursor on the repo folder.
-4. Commits and pushes Cursor's work.
-5. Asks ChatGPT to review.
+1. Talks to the Architect.
+2. Pulls Architect changes locally when another tool must see them.
+3. Tells the Executor to run the Active task.
+4. Commits and pushes work when that is the Human's job in this setup.
+5. Tells the Reviewer to review.
 
-For the optional builder/product topology, the human also:
+The Human retains authority over risky, destructive, and external-impact decisions. Claude in any role must stop and ask before those actions. See [Roles](ROLES.md).
+
+For the optional builder/product topology, the Human also:
 
 1. Creates the builder repository and sets git remotes (see [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md)).
-2. Connects/authorizes **both** the builder and the product in ChatGPT and in Cursor before cross-repo work. AIOS cannot do this automatically.
+2. Connects/authorizes **both** the builder and the product in the tools that will act as Architect, Executor, and Reviewer. AIOS cannot do this automatically.
 3. Commits and pushes product changes when a task changed the product.
 
 ## Files
 
-| File | Owner | Purpose |
-|------|-------|---------|
-| `queue.md` | ChatGPT | Task state |
-| `prompts/*.prompt.md` | ChatGPT | Task instructions |
-| `prompts/*.response.md` | Cursor | Execution notes |
-| `prompts/*.review.md` | ChatGPT | Review verdict |
-| `suggestions/` | ChatGPT | Documented ideas before tasks |
-| `memory/` | ChatGPT | Durable project knowledge |
+| File | Writer | Purpose |
+|------|--------|---------|
+| `queue.md` | Architect; Reviewer after a review | Task state |
+| `prompts/*.prompt.md` | Architect | Task instructions |
+| `prompts/*.response.md` | Executor | Execution notes |
+| `prompts/*.review.md` | Reviewer | Review verdict |
+| `suggestions/` | Architect | Documented ideas before tasks |
+| `memory/` | Architect | Durable project knowledge |
+
+The Executor must not edit `queue.md`.
 
 In the builder/product topology these files live in the builder. See [Repository topologies](TOPOLOGY.md).

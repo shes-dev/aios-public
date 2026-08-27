@@ -1,6 +1,10 @@
 # Operator Guide
 
+Roles: [Roles](ROLES.md). One Claude session may be Architect, Executor, and Reviewer sequentially. ChatGPT + Cursor remains valid.
+
 ## Basic Loop
+
+ChatGPT + Cursor assignment:
 
 1. Talk with ChatGPT.
 2. Tell ChatGPT: `Document this`.
@@ -11,11 +15,13 @@
 7. Tell ChatGPT: `review 0001`.
 8. ChatGPT updates `queue.md`.
 
+Claude-only assignment: tell one Claude session the same commands in order (`document this`, `execute 0001`, `review 0001`). Keep separate prompt, response, and review files.
+
 That loop is the same in both topologies. See [Repository topologies](TOPOLOGY.md).
 
 ## Bootstrap
 
-ChatGPT creates missing runtime folders when needed:
+The Architect creates missing runtime folders when needed:
 
 ```text
 prompts/
@@ -29,9 +35,9 @@ For an **existing** product repository, the optional builder path is [Existing-p
 
 ## Queue
 
-ChatGPT manages `queue.md`.
+The Architect owns `queue.md`. The Reviewer updates it after a review.
 
-Cursor does not edit it.
+The Executor does not edit it.
 
 ```text
 # In Line
@@ -46,22 +52,26 @@ In the builder/product topology, this file lives in the builder.
 ## Task Files
 
 ```text
-prompts/NNNN-slug.prompt.md    # written by ChatGPT
-prompts/NNNN-slug.response.md  # written by Cursor
-prompts/NNNN-slug.review.md    # written by ChatGPT
+prompts/NNNN-slug.prompt.md    # written by Architect
+prompts/NNNN-slug.response.md  # written by Executor
+prompts/NNNN-slug.review.md    # written by Reviewer
 ```
 
-## Cursor Rule
+## Executor Rule
 
-Cursor executes the task and writes the response.
+The Executor executes the task and writes the response.
 
-Cursor does not edit `queue.md`.
+The Executor does not edit `queue.md`.
 
-Cursor changes the product repository only when the task explicitly says so.
+The Executor changes the product repository only when the task explicitly says so.
 
-## ChatGPT Rule
+## Architect Rule
 
-ChatGPT plans, reviews, documents, creates missing folders, and moves the queue.
+The Architect plans, documents, creates missing folders, writes tasks, and owns `queue.md` state.
+
+## Reviewer Rule
+
+The Reviewer writes the review and then updates `queue.md` according to the result.
 
 ## Ownership
 

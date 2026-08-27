@@ -1,10 +1,12 @@
 # Workflow
 
-AIOS is a file-based workflow for ChatGPT, Cursor, and a human.
+AIOS is a file-based workflow for a Human and three roles: Architect, Executor, and Reviewer.
 
 ```text
-Talk -> Document -> Task -> Cursor executes -> Review -> Done
+Talk -> Document -> Task -> Execute -> Review -> Done
 ```
+
+One Claude session may perform Architect, Executor, and Reviewer sequentially. ChatGPT + Cursor remains valid. See [Roles](ROLES.md).
 
 ## Queue
 
@@ -18,15 +20,15 @@ Talk -> Document -> Task -> Cursor executes -> Review -> Done
 # Blocked
 ```
 
-ChatGPT manages the queue.
+The Architect owns `queue.md`. The Reviewer updates it after a review.
 
-Cursor does not edit `queue.md`.
+The Executor does not edit `queue.md`.
 
 ## Bootstrap
 
 The repo starts small.
 
-ChatGPT creates runtime folders when the workflow needs them:
+The Architect creates runtime folders when the workflow needs them:
 
 ```text
 prompts/
@@ -36,11 +38,13 @@ memory/
 
 Do not ask the human to create these folders manually.
 
-Single-repository bootstrap: clone this protocol repo and start talking to ChatGPT. See the root README.
+Single-repository bootstrap: clone this protocol repo and start talking to the Architect. See the root README.
 
 Existing-product bootstrap (optional builder/product split): see [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md) and [Repository topologies](TOPOLOGY.md).
 
 ## Task Flow
+
+ChatGPT as Architect/Reviewer and Cursor as Executor is one valid assignment:
 
 1. Human talks with ChatGPT.
 2. Human says: `Document this`.
@@ -55,12 +59,14 @@ Existing-product bootstrap (optional builder/product split): see [Existing-proje
 11. ChatGPT writes the review and updates `queue.md`.
 12. If accepted, ChatGPT moves the task to Completed.
 
+The same artifacts and order apply when one Claude session plays every role. The Human tells that session to change roles (`document this` / `execute 0001` / `review 0001`) instead of switching products. Claude must still write a prompt, then a response, then a review.
+
 In the builder/product topology:
 
 - steps 4–11 use the **builder** repository for queue, prompts, responses, and reviews
-- the human must already have connected both builder and product in ChatGPT and in Cursor
-- Cursor modifies the product repository only when the task explicitly says so
-- if the product changed, the human also commits and pushes the product repository
+- the Human must already have connected both builder and product in the tools that will act as Architect, Executor, and Reviewer
+- the Executor modifies the product repository only when the task explicitly says so
+- if the product changed, the Human also commits and pushes the product repository
 
 ## Files
 
@@ -72,15 +78,15 @@ prompts/NNNN-slug.review.md
 
 The prompt says what to do.
 
-The response says what Cursor did.
+The response says what the Executor did.
 
-The review says whether ChatGPT accepts it.
+The review says whether the Reviewer accepts it.
 
 ## Rework
 
-If a task needs more work, ChatGPT creates a new task that refers to the review.
+If a task needs more work, the Architect creates a new task that refers to the review.
 
-The human still tells Cursor only:
+The Human still tells the Executor only:
 
 ```text
 execute 0002

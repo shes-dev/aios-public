@@ -30,7 +30,7 @@ aios-public clone
 
 ChatGPT, Cursor, or one Claude session, plus the Human, all work in that one repository.
 
-The root README still describes this path until the onboarding README task rewrites it.
+The root README beginner path uses builder/product. This single-repository path remains valid for teams that want one shared `origin`.
 
 ## Ownership
 

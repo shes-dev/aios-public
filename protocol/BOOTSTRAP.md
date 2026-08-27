@@ -2,7 +2,7 @@
 
 This is the canonical AIOS stage-1 product/builder contract for Claude.
 
-It does not replace [Roles](ROLES.md). It does not rewrite the root README. Single-repository AIOS remains valid; it is not this stage-1 default.
+It does not replace [Roles](ROLES.md). The root README beginner prompt invokes this contract. Single-repository AIOS remains valid; it is not this stage-1 default.
 
 ## Default topology
 

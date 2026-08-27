@@ -1,144 +1,99 @@
 # AIOS
 
-AIOS is a simple way to work with ChatGPT and Cursor without losing the thinking.
+AIOS is a simple git + markdown workflow for building software with AI.
 
-The repo is the shared workspace:
+You talk. Claude plans, implements, and reviews in separate steps. Progress lives in files in a builder repository, not only in chat.
 
-```text
-ChatGPT plans -> Cursor executes -> ChatGPT reviews -> queue.md moves forward
-```
+No app. No server. No CLI. Just GitHub, Claude, and markdown.
 
-No app. No server. No CLI. Just git and markdown files.
+## Start here
 
-## Start
+You need:
 
-This is the default path: one repository.
+1. A GitHub account.
+2. Claude with access to GitHub (or the ability to create/open repositories you authorize).
+3. Either an idea for a new project, or an existing product repository to adopt.
 
-1. Clone this repo.
-2. Open ChatGPT and connect it to this GitHub repo.
-3. Open Cursor on the cloned repo folder.
-4. Start by talking to ChatGPT.
-
-When asking ChatGPT to read or write repo files, make sure the GitHub connector is attached to that message. If it is not attached, ChatGPT may not have repo access for that turn.
-
-Tell ChatGPT:
+### Copy this prompt into Claude
 
 ```text
-This repo uses AIOS. Read the README and protocol. We are starting a new project. Create anything missing when the workflow needs it.
+You are running AIOS from https://github.com/shes-dev/aios-public.
+
+Read these protocol files first and follow them:
+- protocol/ROLES.md
+- protocol/BOOTSTRAP.md
+- protocol/TOPOLOGY.md
+- protocol/WORKFLOW.md
+- protocol/AGENTS.md
+
+What I want:
+<describe the new product to build, OR paste the existing product GitHub URL / owner/name>
+
+Do this next:
+1. Follow reuse-before-create. Adopt an existing product if I named one. Reuse a matching builder if one exists. Create a product and/or <product>-builder only when missing and I authorize creation. Never replace or rewrite an existing product's history.
+2. Keep aios-public as protocol source only. The builder's origin must be the builder. Do not put consumer knowledge into aios-public.
+3. Record durable baseline/pairing state in the builder under memory/.
+4. Then begin the AIOS loop as Architect: talk with me, document useful decisions, create the first task in the builder queue when ready.
+5. Keep Architect, Executor, and Reviewer as separate phases with separate prompt/response/review files even if you perform all three roles in this session.
+6. Stop and ask me before creating repositories, force-pushing, deploying, or any other risky/external action.
+
+Start by confirming what you understood and what product/builder you will adopt, reuse, or create.
 ```
 
-## Existing project
+Replace the `<describe…>` line with your project. Paste the whole block into Claude.
 
-If you already have a product repository and want AIOS planning kept separate from product code, use a builder repository. That path is optional. Single-repository AIOS remains valid.
+Claude will adopt or create the product and builder from the protocol rules. You do not need to choose a path first.
+
+## Deeper documentation
+
+Use these when you want the details behind the prompt:
+
+| Topic | Doc |
+|-------|-----|
+| Roles (Architect / Executor / Reviewer) | [protocol/ROLES.md](protocol/ROLES.md) |
+| Adopt / reuse / create bootstrap | [protocol/BOOTSTRAP.md](protocol/BOOTSTRAP.md) |
+| Repository topologies | [protocol/TOPOLOGY.md](protocol/TOPOLOGY.md) |
+| Task loop and queue | [protocol/WORKFLOW.md](protocol/WORKFLOW.md) |
+| Agents and file ownership | [protocol/AGENTS.md](protocol/AGENTS.md) |
+| Existing product + new builder git commands | [protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md) |
+| Operator guide | [protocol/README.md](protocol/README.md) |
+
+## Manual ChatGPT + Cursor path
+
+Still valid. Not required for the Claude start above.
+
+In that assignment, ChatGPT is Architect/Reviewer and Cursor is Executor. Same files and loop:
 
 ```text
-aios-public
-    ↓ protocol/template source
-<project>-builder
-    ↓ approved tasks / project knowledge
-<project>
+Talk -> Document -> Task -> Execute -> Review -> Done
 ```
 
-Full copy/paste bootstrap, remotes, ownership, and first-task flow:
-
-- [Existing-project initialization](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md)
-- [Repository topologies](protocol/TOPOLOGY.md)
-
-The human must connect both the builder and the product in ChatGPT and in Cursor. AIOS cannot do that automatically.
-
-## The Loop
-
-1. Talk with ChatGPT.
-2. Make sure GitHub is attached when repo changes are needed.
-3. Tell ChatGPT: **Document this**.
-4. Tell ChatGPT to create a task.
-5. Pull the changes locally.
-6. Tell Cursor: **execute 0001**.
-7. Cursor writes a response file.
-8. Commit and push Cursor's work.
-9. Make sure GitHub is attached again.
-10. Tell ChatGPT: **review 0001**.
-11. ChatGPT writes the review and updates `queue.md`.
-12. When accepted, ChatGPT moves the task to Completed.
-
-In the builder/product topology, the loop files live in the builder. Cursor changes the product only when the task says so.
-
-## Files
-
-The repo starts small.
-
-ChatGPT creates runtime folders when needed.
-
-| File | Owner | Purpose |
-|------|-------|---------|
-| `queue.md` | ChatGPT | Task state |
-| `prompts/*.prompt.md` | ChatGPT | Task instructions |
-| `prompts/*.response.md` | Cursor | Work summary |
-| `prompts/*.review.md` | ChatGPT | Review verdict |
-| `suggestions/` | ChatGPT | Ideas before tasks |
-| `memory/` | ChatGPT | Decisions worth keeping |
-
-If `prompts/`, `suggestions/`, or `memory/` does not exist yet, ChatGPT creates it.
-
-In the optional builder/product topology, these files live in the builder. The product repository keeps application code.
-
-## Rule
-
-Cursor executes tasks.
-
-ChatGPT manages `queue.md`.
-
-Cursor must not move tasks between queue sections.
-
-## Example
-
-You tell ChatGPT:
+Typical commands:
 
 ```text
-Let's think about adding a simple onboarding flow.
-```
-
-After the discussion, make sure GitHub is attached and say:
-
-```text
-Document this and create a task.
-```
-
-ChatGPT creates the needed files:
-
-```text
-suggestions/0001-onboarding-flow.prompt.md
-prompts/0001-onboarding-flow.prompt.md
-queue.md
-```
-
-You pull locally:
-
-```bash
-git pull
-```
-
-Tell Cursor:
-
-```text
+Document this
 execute 0001
-```
-
-Cursor does the work and writes:
-
-```text
-prompts/0001-onboarding-flow.response.md
-```
-
-Commit and push Cursor's work.
-
-Then make sure GitHub is attached and tell ChatGPT:
-
-```text
 review 0001
 ```
 
-ChatGPT writes the review and updates `queue.md`.
+Cursor must not edit `queue.md`. ChatGPT owns queue updates as Architect and Reviewer.
+
+Open the builder folder in Cursor. Connect both builder and product in ChatGPT and Cursor before cross-repo work. AIOS cannot authorize tools for you.
+
+## Files
+
+AIOS files live in the **builder** (or in a single-repo workspace if you choose that topology):
+
+| File | Writer | Purpose |
+|------|--------|---------|
+| `queue.md` | Architect; Reviewer after review | Task state |
+| `prompts/*.prompt.md` | Architect | Task instructions |
+| `prompts/*.response.md` | Executor | Work summary |
+| `prompts/*.review.md` | Reviewer | Review verdict |
+| `suggestions/` | Architect | Ideas before tasks |
+| `memory/` | Architect | Decisions and pairing worth keeping |
+
+The **product** repository keeps application, runtime, and deployment code. The Executor changes it only when a task says so.
 
 ## License
 

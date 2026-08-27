@@ -40,7 +40,7 @@ Do not ask the Human to create these folders manually.
 
 Canonical stage-1 product/builder bootstrap: [Bootstrap](BOOTSTRAP.md) and [Repository topologies](TOPOLOGY.md).
 
-Single-repository bootstrap remains valid: clone this protocol repo and start talking to the Architect. See the root README until that onboarding page is rewritten.
+Single-repository bootstrap remains valid: clone this protocol repo and start talking to the Architect. Beginner onboarding starts from the root README Claude prompt.
 
 Existing-product git sequence when a matching builder does **not** already exist: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
 

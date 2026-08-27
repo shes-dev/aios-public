@@ -2,7 +2,7 @@
 
 The canonical AIOS stage-1 topology is product + builder, with `aios-public` as protocol source.
 
-Adopt, reuse, and create rules: [Bootstrap](BOOTSTRAP.md).
+Stage-1 assumes the Human already created both repositories. Claude initializes or resumes the builder. Details: [Bootstrap](BOOTSTRAP.md).
 
 ## Default: builder and product
 
@@ -17,7 +17,7 @@ aios-public
 
 `aios-public` stays generic. It is the protocol/template source, not the builder's primary origin, and not a place for consumer-specific knowledge.
 
-The builder is the AIOS workspace. The product is implementation code. Reuse an existing matching builder; create `<product-repo-name>-builder` only when none exists and creation is authorized.
+The builder is the AIOS workspace. The product is implementation code. The Stage-1 README prompt names both. Advanced adopt/create rules live in [Bootstrap](BOOTSTRAP.md) and are not part of the beginner paste.
 
 ## Single repository
 

@@ -38,11 +38,11 @@ memory/
 
 Do not ask the Human to create these folders manually.
 
-Canonical stage-1 product/builder bootstrap: [Bootstrap](BOOTSTRAP.md) and [Repository topologies](TOPOLOGY.md).
+Canonical stage-1 product/builder bootstrap: [Bootstrap](BOOTSTRAP.md) and [Repository topologies](TOPOLOGY.md). Stage 1 assumes the Human already created both repositories; Claude initializes or resumes the builder from the root README prompt.
 
-Single-repository bootstrap remains valid: clone this protocol repo and start talking to the Architect. Beginner onboarding starts from the root README Claude prompt.
+Single-repository bootstrap remains valid: clone this protocol repo and start talking to the Architect.
 
-Existing-product git sequence when a matching builder does **not** already exist: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
+Advanced empty-builder git sequence when a builder does **not** already exist: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
 
 ## Task Flow
 

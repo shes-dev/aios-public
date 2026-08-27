@@ -1,31 +1,84 @@
 # Bootstrap
 
-This is the canonical AIOS stage-1 product/builder contract for Claude.
+Stage-1 AIOS assumes the Human has already created the product and builder repositories and given Claude access to both.
 
-It does not replace [Roles](ROLES.md). The root README beginner prompt invokes this contract. Single-repository AIOS remains valid; it is not this stage-1 default.
+The root README beginner path is: paste one short prompt with those two repo names. Claude does not create GitHub repositories, use hosted AIOS, or use any persistence outside builder Git files.
 
-## Default topology
+This file does not replace [Roles](ROLES.md). Single-repository AIOS remains valid; it is not the Stage-1 default.
+
+## Stage-1 handoff
 
 ```text
-aios-public
-    ↓ protocol source
-<project>-builder
-    ↓ AIOS workspace
-<project>
-    ↓ product implementation
+Human creates <project> and <project>-builder
+        ↓
+Human opens Claude with access to them
+        ↓
+Human pastes the README start prompt
+        ↓
+Claude reads shes-dev/aios-public protocol
+        ↓
+Claude initializes or resumes AIOS in the builder
+        ↓
+Claude works Architect -> Executor -> Reviewer
 ```
 
-| Repository | Role | Canonical `origin` |
-|------------|------|--------------------|
-| `<AIOS_PUBLIC_REPOSITORY>` | Generic protocol/template source | its own GitHub repo |
-| `<BUILDER_REPOSITORY>` | AIOS workspace: queue, prompts, responses, reviews, suggestions, memory | the builder |
-| `<PRODUCT_REPOSITORY>` | Application, runtime, and deployment code | the product |
+| Repository | Role |
+|------------|------|
+| `shes-dev/aios-public` | Protocol source only |
+| `<owner>/<project>-builder` | Durable AIOS workspace |
+| `<owner>/<project>` | Product implementation |
+
+Default branch name: `main`.
+
+Builder remotes (when configured):
+
+```text
+origin       -> <BUILDER_REPOSITORY>
+aios-public  -> shes-dev/aios-public
+```
 
 `aios-public` is never the builder's `origin`. Consumer knowledge does not belong in `aios-public`.
 
-Default GitHub branch name is `main`.
+## Initialize or resume
 
-## Decision rule: reuse before create
+When Claude receives the Stage-1 prompt with both repos named:
+
+1. **Open the named builder and product.** Do not search for substitutes. Do not create repositories.
+2. **If the builder has no AIOS state** (no usable `queue.md` / `prompts/` / `memory/`):
+   - create missing `queue.md`, `prompts/`, `suggestions/`, `memory/` as needed;
+   - pull or copy protocol reference as needed without making `aios-public` the builder origin;
+   - write `memory/product-pairing.md` (and/or `memory/adoption-baseline.md`) naming product, builder, and protocol source;
+   - begin as Architect.
+3. **If the builder already has AIOS state**:
+   - resume it;
+   - do **not** overwrite or reinitialize `queue.md`, `prompts/`, reviews, `suggestions/`, or `memory/`;
+   - update pairing only if missing or clearly stale, without erasing durable history;
+   - continue the queue from its current sections.
+4. **Product history is sacred.** Never force-push, rewrite, or replace an existing product. Empty/new products stay empty until a later task implements something.
+5. **Persistence is Git in the builder.** No hosted UI store, extension artifact store, MCP memory, or PAT/device-flow auth is required for Stage 1.
+
+## Ownership
+
+Builder owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, and all task/response/review files.
+
+Product owns application, runtime, and deployment code.
+
+## Human-only boundaries (Stage 1)
+
+The Human must:
+
+1. Create the product repository.
+2. Create the matching builder repository.
+3. Grant Claude access to both.
+4. Paste the README start prompt (with the two repo names filled in).
+
+Claude must stop and ask before risky/external actions (force-push, deploy, secrets, deleting repos, etc.). See [Roles](ROLES.md).
+
+If Claude cannot access a named repo, ask only for access to **that** repo. Do not invent a differently named substitute.
+
+## Advanced: adopt / create when repos are missing
+
+Not part of the Stage-1 beginner path. Kept for operators who still need discovery or creation.
 
 Inspect first. Create only when missing **and** the Human has authorized repository creation. Never create a second copy of something that already exists.
 
@@ -33,114 +86,22 @@ Inspect first. Create only when missing **and** the Human has authorized reposit
 |---------|------------------|--------|
 | Exists | Exists | Adopt the product. Reuse the builder. Create neither. |
 | Exists | Missing, creation authorized | Adopt the product. Create `<product-repo-name>-builder`. |
-| Exists | Missing, not authorized | Adopt the product read-only. Stop for the Human handoff below. Do not invent a differently named builder. |
-| Missing, creation authorized | Exists and pairs to this intended project | Reuse the builder. Create/initialize the product. |
-| Missing, creation authorized | Missing, creation authorized | Create/initialize the product. Create `<product-repo-name>-builder`. Pair them. |
-| Missing, not authorized | Any | Stop for the Human handoff. Do not create a builder for a product that is not identified yet. |
+| Exists | Missing, not authorized | Adopt the product read-only. Stop for Human. |
+| Missing, creation authorized | Matching builder | Reuse the builder. Create/initialize the product. |
+| Missing, creation authorized | Missing, creation authorized | Create both. Pair them. |
+| Missing, not authorized | Any | Stop. Do not invent the product. |
 
-If two builders look like a match, stop and ask the Human. Do not create a third.
+Matching-builder evidence (when the Human did not name the builder): Human identity → `<product>-builder` name → `memory/` pairing → AIOS artifacts → `aios-public` remote → description. Ambiguous matches: stop and ask.
 
-## Adopt product, never replace it
+Empty-builder git sequence: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
 
-When a product repository already exists:
+## Stop (after Stage-1 init/resume)
 
-- Use it. Do not create a replacement with a similar name.
-- Do not reinitialize, squash, or rewrite its history.
-- Do not force-push, delete branches, or change its `origin`.
-- Keep existing branches. Adoption is fetch/clone, not a new root.
-- Do not copy product history into `aios-public`.
-- Do not change product behavior during bootstrap. Implementation waits for a later task that says so.
+Bootstrap handoff is done when:
 
-When no product exists and creation is authorized, initialize a normal product repository. The product does **not** start from `aios-public`. Only the builder pulls protocol from `aios-public`.
+- the named product and builder are in use;
+- the builder has AIOS runtime files (new or resumed);
+- pairing is recorded under builder `memory/`;
+- product history was not rewritten.
 
-## Recognize a matching builder
-
-Use evidence in this order. One strong match is enough. Conflicting matches: stop and ask.
-
-1. **Human identity** — the Human named a builder URL or `owner/name`.
-2. **Repository name** — same owner as the product, name `<product-repo-name>-builder`.
-3. **Durable pairing** — builder `memory/product-pairing.md` or `memory/adoption-baseline.md` names this product.
-4. **AIOS artifacts** — `queue.md` with the five protocol sections, plus `prompts/` and/or `protocol/`.
-5. **Protocol relationship** — git remote `aios-public` (or equivalent) pointing at `<AIOS_PUBLIC_REPOSITORY>`, and `origin` pointing at the builder itself.
-6. **Description** — GitHub description or README stating it is the AIOS builder for this product.
-
-Do **not** treat `<AIOS_PUBLIC_REPOSITORY>` as a consumer builder.
-
-If a candidate already has AIOS artifacts, reuse it. Do not reinitialize it. Do not pull `aios-public` in a way that overwrites existing queue, prompts, or memory.
-
-## Create a builder (only if missing and authorized)
-
-Recommended name: `<product-repo-name>-builder`.
-
-Create it **empty** (no README, license, or template commit). Keep `origin` on the builder. Add `aios-public` as a secondary remote and pull protocol `main`. Exact git example: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
-
-After create or reuse, builder remotes must be:
-
-```text
-origin       -> <BUILDER_REPOSITORY>
-aios-public  -> <AIOS_PUBLIC_REPOSITORY>
-```
-
-Later protocol updates:
-
-```bash
-git fetch aios-public
-git merge aios-public/main
-```
-
-Do not retarget `origin` to `aios-public`. Do not force-push the product to "fix" a builder setup.
-
-## Ownership after bootstrap
-
-Builder owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, and all task/response/review files.
-
-Product owns application, runtime, and deployment code.
-
-Record pairing in the builder, not in `aios-public`. Create or update `memory/product-pairing.md` with at least:
-
-- product repository (`owner/name`)
-- builder repository (`owner/name`)
-- protocol source (`aios-public` remote)
-- product and builder default branches
-- whether each was adopted/reused or created in this bootstrap
-- confirmation that product history was not rewritten
-
-## Authorization and smallest Human handoff
-
-Creating or granting access to GitHub repositories is a Human operation unless this session already has that authority.
-
-Claude (any role) must stop and ask before creating, deleting, or transferring repositories. See [Roles](ROLES.md).
-
-When Claude **cannot** create or access a required repo, ask for the smallest missing step, then wait. Do not start a parallel repo under a new name.
-
-**Missing repo, no create access:**
-
-```text
-I cannot create GitHub repositories from this session.
-
-Please create this empty repository (no README) and grant this session access:
-  <OWNER>/<REPO_NAME>
-
-Tell me when it exists. I will adopt/reuse it. I will not create a second copy.
-```
-
-**Repo exists, no access:**
-
-```text
-I found <OWNER>/<REPO_NAME> but this session cannot access it.
-
-Please grant access (or confirm a different repo). I will not create a duplicate under another name.
-```
-
-After the Human confirms, re-run the decision table from the top. Still reuse-before-create.
-
-## Stop
-
-Bootstrap is done when:
-
-- product identity is stable (adopted or created, history intact);
-- exactly one matching builder is in use (`origin` on the builder, `aios-public` as protocol source);
-- pairing is recorded in builder `memory/`;
-- no product implementation has started unless a later task says so.
-
-Then the normal loop begins: Talk -> Document -> Task -> Execute -> Review -> Done.
+Then: Talk -> Document -> Task -> Execute -> Review -> Done.

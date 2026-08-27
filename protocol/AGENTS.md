@@ -84,12 +84,14 @@ The Human:
 
 The Human retains authority over risky, destructive, and external-impact decisions. Claude in any role must stop and ask before those actions. See [Roles](ROLES.md).
 
-For the default builder/product topology, the Human also:
+For the default builder/product topology (Stage 1), the Human also:
 
-1. Authorizes repository access or creation. Claude reuses existing product and matching builder first; it creates `<product>-builder` only when none exists and creation is authorized. See [Bootstrap](BOOTSTRAP.md).
-2. Connects/authorizes **both** the builder and the product in the tools that will act as Architect, Executor, and Reviewer. AIOS cannot do this automatically.
-3. Commits and pushes product changes when a task changed the product.
-4. Creates a missing GitHub repository only when Claude stops with the smallest handoff from [Bootstrap](BOOTSTRAP.md).
+1. Creates the product and matching builder repositories before the first Claude paste.
+2. Grants Claude access to both.
+3. Pastes the root README start prompt with both repo names filled in.
+4. Commits and pushes product changes when a task changed the product.
+
+Claude initializes or resumes AIOS in the builder. Claude does not create those repositories during the beginner path. See [Bootstrap](BOOTSTRAP.md).
 
 ## Files
 

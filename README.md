@@ -1,88 +1,66 @@
 # AIOS
 
-AIOS is a simple git + markdown workflow for building software with AI.
+AIOS is a simple git + markdown workflow for building software with Claude.
 
-You talk. Claude plans, implements, and reviews in separate steps. Progress lives in files in a builder repository, not only in chat.
+You talk. Claude plans, implements, and reviews in separate steps. Progress lives in files in your **builder** repository, not only in chat.
 
 No app. No server. No CLI. Just GitHub, Claude, and markdown.
 
 ## Start here
 
-You need:
+Stage 1 needs four Human setup steps, then one paste into Claude.
 
-1. A GitHub account.
-2. Claude with access to GitHub (or the ability to create/open repositories you authorize).
-3. Either an idea for a new project, or an existing product repository to adopt.
+1. Create the product repository on GitHub (`owner/project`).
+2. Create the matching builder repository (`owner/project-builder`).
+3. Give Claude access to both repositories.
+4. Copy the prompt below, fill in the two repo names, and paste it into Claude.
+
+Claude then reads the protocol, initializes or resumes AIOS files in the builder, and continues the project. Claude does **not** create repositories, use hosted AIOS, or need Cursor for Stage 1.
 
 ### Copy this prompt into Claude
 
 ```text
-You are running AIOS from https://github.com/shes-dev/aios-public.
+Use https://github.com/shes-dev/aios-public as the AIOS protocol.
 
-Read these protocol files first and follow them:
-- protocol/ROLES.md
-- protocol/BOOTSTRAP.md
-- protocol/TOPOLOGY.md
-- protocol/WORKFLOW.md
-- protocol/AGENTS.md
+Product repo: <owner/project>
+Builder repo: <owner/project-builder>
 
-What I want:
-<describe the new product to build, OR paste the existing product GitHub URL / owner/name>
-
-Do this next:
-1. Follow reuse-before-create. Adopt an existing product if I named one. Reuse a matching builder if one exists. Create a product and/or <product>-builder only when missing and I authorize creation. Never replace or rewrite an existing product's history.
-2. Keep aios-public as protocol source only. The builder's origin must be the builder. Do not put consumer knowledge into aios-public.
-3. Record durable baseline/pairing state in the builder under memory/.
-4. Then begin the AIOS loop as Architect: talk with me, document useful decisions, create the first task in the builder queue when ready.
-5. Keep Architect, Executor, and Reviewer as separate phases with separate prompt/response/review files even if you perform all three roles in this session.
-6. Stop and ask me before creating repositories, force-pushing, deploying, or any other risky/external action.
-
-Start by confirming what you understood and what product/builder you will adopt, reuse, or create.
+Read the protocol, initialize or resume AIOS in the builder, and continue this project strictly through AIOS.
+You may act sequentially as Architect, Executor, and Reviewer, but keep task, response, review, and queue state as separate durable artifacts in the builder.
 ```
 
-Replace the `<describe…>` line with your project. Paste the whole block into Claude.
+Replace the two `<owner/...>` lines, then paste the whole block.
 
-Claude will adopt or create the product and builder from the protocol rules. You do not need to choose a path first.
+## What Claude does after that
+
+Using only Git files in the builder:
+
+1. Reads `shes-dev/aios-public` protocol (`ROLES`, `BOOTSTRAP`, `TOPOLOGY`, `WORKFLOW`, `AGENTS`).
+2. Treats the builder as the AIOS workspace and the product as implementation code.
+3. If the builder is empty: initializes `queue.md`, `prompts/`, `suggestions/`, `memory/`, and records pairing under `memory/`.
+4. If the builder already has AIOS state: resumes it. Does not overwrite queue, prompts, reviews, suggestions, or memory.
+5. Works as Architect → Executor → Reviewer with separate `.prompt.md`, `.response.md`, and `.review.md` files.
+6. Asks you only for real product decisions or risky/external actions.
 
 ## Deeper documentation
 
-Use these when you want the details behind the prompt:
-
 | Topic | Doc |
 |-------|-----|
-| Roles (Architect / Executor / Reviewer) | [protocol/ROLES.md](protocol/ROLES.md) |
-| Adopt / reuse / create bootstrap | [protocol/BOOTSTRAP.md](protocol/BOOTSTRAP.md) |
-| Repository topologies | [protocol/TOPOLOGY.md](protocol/TOPOLOGY.md) |
-| Task loop and queue | [protocol/WORKFLOW.md](protocol/WORKFLOW.md) |
-| Agents and file ownership | [protocol/AGENTS.md](protocol/AGENTS.md) |
-| Existing product + new builder git commands | [protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md) |
+| Stage-1 handoff (repos already exist) | [protocol/BOOTSTRAP.md](protocol/BOOTSTRAP.md) |
+| Roles | [protocol/ROLES.md](protocol/ROLES.md) |
+| Topologies | [protocol/TOPOLOGY.md](protocol/TOPOLOGY.md) |
+| Task loop | [protocol/WORKFLOW.md](protocol/WORKFLOW.md) |
+| Agents / file ownership | [protocol/AGENTS.md](protocol/AGENTS.md) |
+| Advanced: create builder from protocol | [protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md) |
 | Operator guide | [protocol/README.md](protocol/README.md) |
 
 ## Manual ChatGPT + Cursor path
 
-Still valid. Not required for the Claude start above.
+Still valid. Not required for Stage 1.
 
-In that assignment, ChatGPT is Architect/Reviewer and Cursor is Executor. Same files and loop:
-
-```text
-Talk -> Document -> Task -> Execute -> Review -> Done
-```
-
-Typical commands:
-
-```text
-Document this
-execute 0001
-review 0001
-```
-
-Cursor must not edit `queue.md`. ChatGPT owns queue updates as Architect and Reviewer.
-
-Open the builder folder in Cursor. Connect both builder and product in ChatGPT and Cursor before cross-repo work. AIOS cannot authorize tools for you.
+ChatGPT as Architect/Reviewer, Cursor as Executor. Same files and loop. Cursor must not edit `queue.md`.
 
 ## Files
-
-AIOS files live in the **builder** (or in a single-repo workspace if you choose that topology):
 
 | File | Writer | Purpose |
 |------|--------|---------|
@@ -91,9 +69,9 @@ AIOS files live in the **builder** (or in a single-repo workspace if you choose 
 | `prompts/*.response.md` | Executor | Work summary |
 | `prompts/*.review.md` | Reviewer | Review verdict |
 | `suggestions/` | Architect | Ideas before tasks |
-| `memory/` | Architect | Decisions and pairing worth keeping |
+| `memory/` | Architect | Pairing and decisions |
 
-The **product** repository keeps application, runtime, and deployment code. The Executor changes it only when a task says so.
+These live in the **builder**. The **product** holds application code. Builder Git files are the canonical Stage-1 persistence.
 
 ## License
 

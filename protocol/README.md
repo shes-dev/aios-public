@@ -17,11 +17,11 @@ ChatGPT + Cursor assignment:
 
 Claude-only assignment: tell one Claude session the same commands in order (`document this`, `execute 0001`, `review 0001`). Keep separate prompt, response, and review files.
 
-That loop is the same in both topologies. Canonical stage-1 topology and adopt/reuse/create rules: [Repository topologies](TOPOLOGY.md), [Bootstrap](BOOTSTRAP.md).
+That loop is the same in both topologies. Stage-1 beginner path: [Bootstrap](BOOTSTRAP.md). Topology: [Repository topologies](TOPOLOGY.md).
 
 ## Bootstrap
 
-Canonical stage-1 bootstrap is product + builder with reuse-before-create. See [Bootstrap](BOOTSTRAP.md).
+Stage 1: Human creates product + builder, grants Claude access, pastes the root README prompt. Claude initializes or resumes AIOS **in the builder** using Git files only. See [Bootstrap](BOOTSTRAP.md).
 
 The Architect creates missing runtime folders when needed:
 
@@ -31,9 +31,9 @@ suggestions/
 memory/
 ```
 
-For a **new** or **existing** project, follow [Bootstrap](BOOTSTRAP.md) before creating any GitHub repository. Single-repository clone of this protocol repo remains valid; it is not the Claude stage-1 default.
+If those already exist with AIOS state, resume them. Do not overwrite.
 
-The git sequence for an existing product and a missing builder is [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
+Advanced create/adopt when repos are missing, and the empty-builder git sequence, are documented in [Bootstrap](BOOTSTRAP.md) and [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md). They are not the beginner path.
 
 ## Queue
 

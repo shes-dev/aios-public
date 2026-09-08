@@ -10,19 +10,20 @@ One Claude session may perform Architect, Executor, and Reviewer sequentially. C
 
 ## Queue
 
-`queue.md` has five sections:
+`queue.md` is the **operational queue only** and keeps the live states:
 
 ```text
 # In Line
 # Active
 # Awaiting Review
-# Completed
 # Blocked
 ```
 
+Accepted/completed history should be moved out of the live queue into `COMPLETED.md`; stale, paused, or long-horizon prepared work may be moved to `BACKLOG.md` when a builder uses one. Keep only a short pointer to those archives in `queue.md` when helpful.
+
 The Architect owns `queue.md`. The Reviewer updates it after a review.
 
-The Executor does not edit `queue.md`.
+The Executor does not edit `queue.md`, `COMPLETED.md`, or `BACKLOG.md` during normal execution.
 
 ## Bootstrap
 
@@ -59,7 +60,7 @@ ChatGPT as Architect/Reviewer and Cursor as Executor is one valid assignment:
 9. Human commits and pushes Cursor's changes.
 10. Human tells ChatGPT: `review 0001`.
 11. ChatGPT writes the review and updates `queue.md`.
-12. If accepted, ChatGPT moves the task to Completed.
+12. If accepted, ChatGPT removes the task from operational queue state and appends its final summary to `COMPLETED.md`.
 
 The same artifacts and order apply when one Claude session plays every role. The Human tells that session to change roles (`document this` / `execute 0001` / `review 0001`) instead of switching products. Claude must still write a prompt, then a response, then a review.
 

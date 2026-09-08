@@ -1,4 +1,5 @@
 <!-- Architect owns this file. Reviewer updates it after a review. Executor must not edit it. -->
+<!-- Operational queue only. Accepted history belongs in COMPLETED.md; stale/paused work may live in BACKLOG.md. -->
 
 # In Line
 
@@ -6,6 +7,7 @@
 
 # Awaiting Review
 
-# Completed
-
 # Blocked
+
+# Completed
+See [COMPLETED.md](COMPLETED.md).

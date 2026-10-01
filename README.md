@@ -1,62 +1,94 @@
 # AIOS
 
-AIOS is a simple git + markdown workflow for building software with AI while preserving the thinking, execution, and review as durable project files.
+AIOS is a **vendor-agnostic protocol** for humans and AI agents collaborating on long-lived work. It preserves thinking, execution evidence, review, and knowledge as durable Git and Markdown artifacts — not as disposable chat.
 
-For Stage 1, use **Claude Code**. Claude Code may act sequentially as Architect, Executor, and Reviewer, but the roles and artifacts stay separate.
+> **AI agents are workers. The protocol is the organization.**
 
-Progress lives in your **builder** repository, not only in chat.
+Roles are logical contracts (Architect, Executor, Reviewer, Human). Tools and vendors are replaceable. AIOS does not launch, schedule, route, connect, or monitor agents. External workers consume approved tasks and return evidence through the same files.
 
-## Stage 1 — start here
+## Knowledge lifecycle
 
-The validated beginner path is:
-
-```text
-Human creates product repo + builder repo
-        ↓
-Human opens Claude Code with direct access to both
-        ↓
-Paste one prompt
-        ↓
-Claude Code initializes or resumes AIOS in the builder
-        ↓
-Claude asks what to build
-```
-
-Stage 1 does **not** require Cowork, hosted AIOS, AIOS MCP tools, the AIOS GitHub App, an artifact store, or Cursor.
-
-### 1. Create the two repositories
-
-Create an empty product repository and an empty builder repository. Private repositories are supported and are the recommended default example.
-
-Using GitHub CLI:
-
-```bash
-gh repo create <owner>/<project> --private
-gh repo create <owner>/<project>-builder --private
-```
-
-Do not add a README, license, `.gitignore`, or template during creation.
-
-The topology is:
+AIOS is not only a task board. The canonical flow is:
 
 ```text
-shes-dev/aios-public
-        ↓ protocol source
-<owner>/<project>-builder
-        ↓ AIOS workspace
-<owner>/<project>
-        ↓ implementation
+Discussion
+  ↓
+Document
+  ↓
+Suggestion
+  ↓
+Promote
+  ↓
+Task
+  ↓
+Implementation
+  ↓
+Review
+  ↓
+Knowledge
 ```
 
-### 2. Open Claude Code
+**Suggestions** capture product and organizational thinking before implementation. Only promoted work becomes **Tasks**. Accepted outcomes become durable **Knowledge**.
 
-Use **Claude Code** (desktop/GUI or local CLI) with normal direct Git/GitHub access to both repositories.
+## QMD — the operational board
 
-For private repositories, Claude Code must be able to read and write them through your normal Git/GitHub authorization. Stage 1 does not route repository access through AIOS hosted state or the AIOS GitHub App.
+**QMD** is the human-readable Markdown operational queue / task board. It is backed by canonical files such as `queue.md` and the matching task artifacts under `prompts/`. QMD is not a hosted runtime service.
 
-### 3. Paste this prompt into Claude Code
+Illustrative board (independent tasks, different external workers):
 
-Replace the two repo names and paste the whole block:
+```text
+# In Line
+0003  document pricing edge cases          → Architect
+
+# Active
+0001  fix auth redirect                    → Cursor
+0002  draft onboarding copy                → Claude
+0004  explore billing API shape            → Codex
+
+# Awaiting Review
+0005  add health endpoint                  → (response ready)
+
+# Blocked
+```
+
+**Ownership:** Architect and Reviewer own lifecycle state on the board. Executors execute Active tasks and write responses; they do not arbitrarily rewrite queue state.
+
+## Protocol invariant vs tooling
+
+**Invariant (always):**
+
+```text
+Architect defines approved work
+  → external Executor consumes it
+  → response / evidence is produced
+  → Reviewer reviews
+  → canonical state and knowledge advance
+```
+
+**Transport / tooling (examples, not the protocol):** Git pull/push, opening Cursor / Claude / Codex / ChatGPT, pasting a bootstrap prompt, or any other way you move files between people and tools.
+
+Independent approved tasks may run **in parallel** on different external workers. AIOS does not orchestrate that concurrency; the board and artifacts make it visible.
+
+## Supported role assignments (examples)
+
+The invariant is the role/artifact contract, not the vendor. Valid examples:
+
+| Pattern | Architect / Reviewer | Executor(s) |
+|---------|----------------------|-------------|
+| One capable agent, sequential phases | Same session, phase boundaries preserved | Same session after Architect phase |
+| Split tools | ChatGPT | Cursor |
+| Parallel workers | ChatGPT | Cursor + Claude + Codex on independent tasks |
+| Mixed teams | Human + AI | Human + AI |
+
+Claude-only sequential operation remains a supported pattern. It is not the definition of AIOS.
+
+## Try AIOS
+
+About one minute to start:
+
+1. Create (or reuse) a **builder** repository for AIOS state and a **product** repository for implementation. Private repos are fine.
+2. Open any capable Architect agent with access to both (and to this protocol).
+3. Paste:
 
 ```text
 Use https://github.com/shes-dev/aios-public as the AIOS protocol.
@@ -64,108 +96,77 @@ Use https://github.com/shes-dev/aios-public as the AIOS protocol.
 Product repo: <owner/project>
 Builder repo: <owner/project-builder>
 
-Work directly with these repositories and their Git files. For this Stage-1 workflow, do not use hosted AIOS state, AIOS MCP tools, AIOS connection status, or AIOS artifact-store persistence.
-
-Read the AIOS protocol first, especially:
+Read the protocol first, especially:
 - protocol/ROLES.md
 - protocol/BOOTSTRAP.md
 - protocol/TOPOLOGY.md
 - protocol/WORKFLOW.md
 - protocol/AGENTS.md
 
-Then initialize or resume AIOS in the builder repository and continue strictly through the protocol.
+Initialize or resume AIOS in the builder using Git/Markdown artifacts only.
+Preserve role boundaries and durable files:
+- Architect creates task prompts and owns queue.md (QMD).
+- Executor runs only Active tasks and writes matching responses.
+- Reviewer writes matching reviews, then updates queue.md.
 
-You may act sequentially as Architect -> Executor -> Reviewer, but preserve the role boundaries and durable artifacts:
-- Architect creates task prompts and manages queue.md.
-- Executor executes only the Active task and writes the matching response.
-- Reviewer writes the matching review and then updates queue.md.
+You may staff roles with any capable tools (including one agent sequentially).
+Do not assume AIOS launches or controls workers.
 
-Keep task, response, review, suggestions, memory, and queue state as Git files in the builder.
+Authorize normal builder initialization commits/pushes when the builder is empty.
+Do not modify the product yet. Stop and ask before force-push, history rewrite,
+deploy, publish, delete repos, expose secrets, or other risky/external actions.
 
-You are authorized to perform normal builder initialization, commits, and pushes to the builder repository. Do not modify the product repository yet. Do not force-push, rewrite history, deploy, publish, delete repositories, expose secrets, or perform other risky/external actions without asking me first.
-
-If the builder is empty, initialize it from the AIOS protocol, record the product/builder pairing under memory/, commit and push the builder state, then stop before creating task 0001.
-If the builder already contains AIOS state, resume it without overwriting queue, prompts, reviews, suggestions, or memory.
-
-After initialization or resume, report the resulting AIOS state and ask me what we are building before creating task 0001.
+If the builder is empty: initialize from the protocol, record product/builder pairing
+under memory/, commit and push, then stop before task 0001 and ask what we are building.
+If the builder already has AIOS state: resume without overwriting queue, prompts,
+reviews, suggestions, or memory.
 ```
 
-That is the complete Stage-1 handoff.
-
-## Expected result
-
-For a new builder, Claude Code should leave you with:
+Successful first-run state in the **builder** looks like:
 
 ```text
 queue.md
 prompts/
 suggestions/
 memory/
-memory/product-pairing.md
-protocol/
 ```
 
-The builder should use `main`, with its canonical `origin` still pointing to the builder. When a protocol remote is configured, it should look like:
+The **product** holds implementation and stays untouched until an approved task authorizes changes.
 
-```text
-origin       -> <owner>/<project>-builder
-aios-public  -> shes-dev/aios-public
-```
+Topology detail (product + builder + protocol source): [protocol/TOPOLOGY.md](protocol/TOPOLOGY.md). Full bootstrap notes: [protocol/BOOTSTRAP.md](protocol/BOOTSTRAP.md).
 
-The product repository remains untouched until an approved AIOS task explicitly authorizes implementation.
+### Tested example: Claude Code
 
-For an existing AIOS builder, Claude Code resumes the existing queue, prompts, reviews, suggestions, and memory instead of reinitializing them.
+Claude Code is one concrete, tested bootstrap path (one session may act Architect → Executor → Reviewer sequentially). See [protocol/BOOTSTRAP.md](protocol/BOOTSTRAP.md) for the Claude-specific checklist. It does not define AIOS; any capable Architect agent can run the prompt above.
 
-## Then work normally
+## Human authority
 
-Once Claude asks what to build, the normal loop begins:
-
-```text
-Human + Architect discussion
-        ↓
-Task
-        ↓
-Executor
-        ↓
-Response
-        ↓
-Reviewer
-        ↓
-Review + queue update
-```
-
-One Claude Code session may perform all three AIOS roles sequentially. Separate task, response, and review files are still mandatory.
-
-## Deeper documentation
-
-| Topic | Doc |
-|-------|-----|
-| Stage-1 handoff | [protocol/BOOTSTRAP.md](protocol/BOOTSTRAP.md) |
-| Roles | [protocol/ROLES.md](protocol/ROLES.md) |
-| Topologies | [protocol/TOPOLOGY.md](protocol/TOPOLOGY.md) |
-| Task loop | [protocol/WORKFLOW.md](protocol/WORKFLOW.md) |
-| Agents / file ownership | [protocol/AGENTS.md](protocol/AGENTS.md) |
-| Advanced builder initialization details | [protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md) |
-| Operator guide | [protocol/README.md](protocol/README.md) |
-
-## Other operating patterns
-
-ChatGPT as Architect/Reviewer with Cursor as Executor remains valid. Hosted AIOS can also drive the same protocol files as an optional control plane.
-
-Neither is required for the Stage-1 Claude Code path above.
+The Human owns vision, product decisions, and approvals for risky or external actions (force-push, deploy, publish, secrets, irreversible changes). The Human is not inherently required to shuttle every artifact between tools — that is one possible operating pattern when tools do not share a workspace.
 
 ## Files
 
 | File | Writer | Purpose |
 |------|--------|---------|
-| `queue.md` | Architect; Reviewer after review | Task state |
+| `queue.md` (QMD) | Architect; Reviewer after review | Operational task board |
 | `prompts/*.prompt.md` | Architect | Task instructions |
-| `prompts/*.response.md` | Executor | Work summary |
+| `prompts/*.response.md` | Executor | Work / evidence summary |
 | `prompts/*.review.md` | Reviewer | Review verdict |
 | `suggestions/` | Architect | Ideas before tasks |
 | `memory/` | Architect | Pairing and durable decisions |
 
-These live in the **builder**. The **product** holds implementation code. Builder Git files are the canonical Stage-1 persistence.
+These live in the **builder**. Builder Git files are the canonical organizational state for this protocol path.
+
+## Deeper documentation
+
+| Topic | Doc |
+|-------|-----|
+| Roles | [protocol/ROLES.md](protocol/ROLES.md) |
+| Task / knowledge loop | [protocol/WORKFLOW.md](protocol/WORKFLOW.md) |
+| Agents / file ownership | [protocol/AGENTS.md](protocol/AGENTS.md) |
+| Bootstrap | [protocol/BOOTSTRAP.md](protocol/BOOTSTRAP.md) |
+| Topologies | [protocol/TOPOLOGY.md](protocol/TOPOLOGY.md) |
+| Operator guide | [protocol/README.md](protocol/README.md) |
+| Advanced empty-builder git sequence | [protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md](protocol/examples/INIT_EXISTING_PROJECT.prompt.example.md) |
 
 ## License
 

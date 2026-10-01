@@ -1,27 +1,27 @@
 # Operator Guide
 
-Roles: [Roles](ROLES.md). One Claude session may be Architect, Executor, and Reviewer sequentially. ChatGPT + Cursor remains valid.
+Roles: [Roles](ROLES.md). Staff by example: sequential single-agent phases, ChatGPT + Cursor, or ChatGPT + multiple external workers. AIOS does not launch or connect those workers.
 
 ## Basic Loop
 
-ChatGPT + Cursor assignment:
+Example — ChatGPT + Cursor:
 
 1. Talk with ChatGPT.
 2. Tell ChatGPT: `Document this`.
 3. Tell ChatGPT to create a task.
-4. Pull the repo locally.
+4. Sync Git when the Executor needs the update (optional if tools share the workspace).
 5. Tell Cursor: `execute 0001`.
-6. Commit and push Cursor's changes.
+6. Sync the Executor response back when needed.
 7. Tell ChatGPT: `review 0001`.
 8. ChatGPT updates `queue.md`.
 
-Claude-only assignment: tell one Claude session the same commands in order (`document this`, `execute 0001`, `review 0001`). Keep separate prompt, response, and review files.
+Sequential single-agent assignment: tell one capable session the same commands in order (`document this`, `execute 0001`, `review 0001`). Keep separate prompt, response, and review files.
 
-That loop is the same in both topologies. Stage-1 beginner path: [Bootstrap](BOOTSTRAP.md). Topology: [Repository topologies](TOPOLOGY.md).
+Independent Active tasks may run in parallel on different Executors. Bootstrap: [Bootstrap](BOOTSTRAP.md). Topology: [Repository topologies](TOPOLOGY.md). Knowledge lifecycle: [Workflow](WORKFLOW.md).
 
 ## Bootstrap
 
-Stage 1: Human creates product + builder, grants Claude access, pastes the root README prompt. Claude initializes or resumes AIOS **in the builder** using Git files only. See [Bootstrap](BOOTSTRAP.md).
+Human creates product + builder (typical), grants a capable Architect agent access, pastes the root README prompt. The agent initializes or resumes AIOS **in the builder** using Git files only. See [Bootstrap](BOOTSTRAP.md).
 
 The Architect creates missing runtime folders when needed:
 
@@ -35,7 +35,9 @@ If those already exist with AIOS state, resume them. Do not overwrite.
 
 Advanced create/adopt when repos are missing, and the empty-builder git sequence, are documented in [Bootstrap](BOOTSTRAP.md) and [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md). They are not the beginner path.
 
-## Queue
+## QMD / Queue
+
+**QMD** is the human-readable Markdown operational board backed by `queue.md`. Not a hosted service.
 
 The Architect owns `queue.md`. The Reviewer updates it after a review.
 

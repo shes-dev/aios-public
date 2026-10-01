@@ -20,7 +20,7 @@ Replace all of:
 
 Adopt an existing product into AIOS using a separate builder repository.
 
-Assign Architect and Executor per [Roles](../ROLES.md). ChatGPT as Architect and Cursor as Executor remains valid. One Claude session may perform both sequentially. The product must stay unchanged during this initialization.
+Assign Architect and Executor per [Roles](../ROLES.md). ChatGPT as Architect and Cursor as Executor remains valid. One capable session may perform both sequentially. Multiple external Executors may take independent later tasks. The product must stay unchanged during this initialization.
 
 ## Topology
 

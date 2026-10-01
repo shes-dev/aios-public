@@ -1,64 +1,75 @@
 # Repository topologies
 
-The canonical AIOS topology is product + builder, with `aios-public` as protocol source.
+The public AIOS topology is mandatory:
 
-The Human typically already created both repositories. An Architect agent initializes or resumes the builder. Details: [Bootstrap](BOOTSTRAP.md).
+```text
+one project / workstream  ->  one dedicated builder repo
+one builder repo          ->  one or many product repos
+```
 
-## Default: builder and product
+`aios-public` is protocol source only. Organizational state never lives inside a product repository.
+
+## Builder and product(s)
 
 ```text
 aios-public
     ↓ protocol source
 <project>-builder
-    ↓ AIOS workspace (QMD + artifacts)
-<project>
-    ↓ product implementation
+    ↓ one canonical AIOS state (QMD + artifacts)
+<product-a> ... <product-n>
+    ↓ implementation only
 ```
-
-`aios-public` stays generic. It is the protocol/template source, not the builder's primary origin, and not a place for consumer-specific knowledge.
-
-The builder is the AIOS workspace. The product is implementation code. The README start prompt names both. Advanced adopt/create rules live in [Bootstrap](BOOTSTRAP.md) and are not part of the beginner paste.
-
-## Single repository
-
-Still valid when protocol and product should share one `origin`. Not the default product/builder path.
 
 ```text
-aios-public clone
-  queue.md + prompts + product code in one repository
+                         BUILDER REPO
+
+                         Architect
+                             |
+                 prompts/NNNN-slug.prompt.md
+                      /      |      \
+                 Cursor    Claude   Codex
+                    \        |       /
+                 prompts/NNNN-slug.response.md
+                             |
+                 prompts/NNNN-slug.review.md
+                             |
+                      queue.md / QMD
+
+           product repo A   product repo B   product repo C
 ```
 
-Any valid role staffing (ChatGPT, Cursor, Claude, Codex, sequential single-agent, mixed teams) can work in that one repository.
+The Human typically creates the builder and names the product repo(s). An Architect agent initializes or resumes the builder. Details: [Bootstrap](BOOTSTRAP.md).
+
+`aios-public` stays generic. It is not the builder’s primary origin and not a place for consumer-specific knowledge.
 
 ## Ownership
 
 The **builder** owns:
 
-- `queue.md` (QMD)
-- `prompts/`
+- `queue.md` (QMD lifecycle index)
+- `prompts/` (`.prompt.md` / `.response.md` / `.review.md`)
 - `suggestions/`
 - `memory/`
-- project architecture and operating knowledge
-- task prompts, Executor responses, and reviews
+- cross-repo decisions and evidence
 
-The **product** repository owns:
+Each **product** repository owns:
 
 - application, runtime, and deployment code
 - implementation changes
-- existing Git history and branches (never rewritten during adoption)
+- existing Git history (never rewritten during adoption)
 
-The Executor may change the product repository only when the active task explicitly says so.
+The Executor may change a product repository only when the active task explicitly says so.
 
 ## Builder remotes
 
-After bootstrap, the builder remotes must be:
+After bootstrap:
 
 ```text
 origin       -> <BUILDER_REPOSITORY>
 aios-public  -> <AIOS_PUBLIC_REPOSITORY>
 ```
 
-Never leave the builder's `origin` pointing at `aios-public`.
+Never leave the builder’s `origin` pointing at `aios-public`.
 
 If you cloned `aios-public` by mistake and want that working copy to become a builder, fix the remotes before any push:
 
@@ -69,7 +80,7 @@ git remote -v
 git push -u origin main
 ```
 
-Later protocol updates stay on the secondary remote. Do not retarget `origin`:
+Later protocol updates:
 
 ```bash
 git fetch aios-public
@@ -78,24 +89,20 @@ git merge aios-public/main
 
 ## Who does what
 
-These roles are the same in both topologies. Who plays them is defined in [Roles](ROLES.md). AIOS does not launch or connect tools. Manual Git sync between tools is one possible transport pattern when workspaces are not shared.
+Roles: [Roles](ROLES.md). AIOS does not launch or connect tools.
 
 | Kind | Who | What |
 |------|-----|------|
-| Git operation | Human (or Executor when the task says so and creation is authorized) | Inspect first; reuse existing product/builder; create only if missing; set remotes; never rewrite product history |
-| Tool access | Human | Authorize/connect **both** the builder and the product in the tools that will act as Architect, Executor, and Reviewer before cross-repo work. AIOS cannot do this automatically. |
-| Architect | Role | Plan, write task prompts, own `queue.md` |
-| Executor | Role | Execute the active task, write `prompts/*.response.md`, do not edit `queue.md` |
-| Reviewer | Role | Write `prompts/*.review.md`, then update `queue.md` |
+| Git / access | Human | Create builder; authorize tools on builder + product repo(s); never rewrite product history |
+| Architect | Role | Decompose work; write `.prompt.md`; own QMD; write/own `.review.md`; coordinate independent Executors |
+| Executor | Role | Consume one Active prompt; write matching `.response.md`; do not edit `queue.md` |
+| Reviewer | Role | Often the Architect; writes `.review.md` and updates QMD |
 
-## First task after a builder exists
+## First tasks after a builder exists
 
-1. Architect creates the first numbered task in the builder and updates builder `queue.md`.
-2. Human tells the Executor `execute 0001` (or the applicable task id).
-3. Executor changes the product repository only if that task says so.
-4. Executor writes the response into the builder.
-5. Reviewer writes the review and updates the builder queue.
+1. Architect creates numbered `.prompt.md` files in the builder and updates `queue.md`.
+2. Independent Active tasks may go to different external Executors in parallel (e.g. Cursor / Claude / Codex).
+3. Each Executor changes product repos only if its task says so, and writes its `.response.md` in the builder.
+4. Architect/Reviewer writes each `.review.md` and updates QMD.
 
-Independent Active tasks may be assigned to different external Executors in parallel.
-
-Git sequence for an existing product and a **new** empty builder: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md). Run [Bootstrap](BOOTSTRAP.md) first so that sequence is used only when no matching builder exists.
+Empty-builder git sequence: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md). Run [Bootstrap](BOOTSTRAP.md) first.

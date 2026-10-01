@@ -28,11 +28,11 @@ Assign Architect and Executor per [Roles](../ROLES.md). ChatGPT as Architect and
 aios-public
     ↓ protocol/template source
 <project>-builder
-    ↓ approved tasks / project knowledge
+    ↓ one canonical AIOS state (may later span more product repos)
 <project>
 ```
 
-Single-repository AIOS remains valid. This example is the existing-product git path for the canonical builder/product topology.
+A dedicated builder is mandatory. This example is the existing-product git path for creating that builder.
 
 ## Ownership
 

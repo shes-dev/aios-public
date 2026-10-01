@@ -1,29 +1,24 @@
 # Operator Guide
 
-Roles: [Roles](ROLES.md). Staff by example: sequential single-agent phases, ChatGPT + Cursor, or ChatGPT + multiple external workers. AIOS does not launch or connect those workers.
+Roles: [ROLES.md](ROLES.md). Topology: [TOPOLOGY.md](TOPOLOGY.md).
 
-## Basic Loop
+One Architect context; external Executors (possibly parallel); dedicated builder mandatory. AIOS does not launch or connect workers.
 
-Example — ChatGPT + Cursor:
+## Basic loop
 
-1. Talk with ChatGPT.
-2. Tell ChatGPT: `Document this`.
-3. Tell ChatGPT to create a task.
-4. Sync Git when the Executor needs the update (optional if tools share the workspace).
-5. Tell Cursor: `execute 0001`.
-6. Sync the Executor response back when needed.
-7. Tell ChatGPT: `review 0001`.
-8. ChatGPT updates `queue.md`.
+1. Talk with the Architect.
+2. Architect writes Suggestion and/or `prompts/NNNN-slug.prompt.md` and updates QMD.
+3. Hand Active prompts to Executors (`execute NNNN`).
+4. Executors write matching `.response.md`.
+5. Architect/Reviewer writes `.review.md` and updates `queue.md`.
 
-Sequential single-agent assignment: tell one capable session the same commands in order (`document this`, `execute 0001`, `review 0001`). Keep separate prompt, response, and review files.
-
-Independent Active tasks may run in parallel on different Executors. Bootstrap: [Bootstrap](BOOTSTRAP.md). Topology: [Repository topologies](TOPOLOGY.md). Knowledge lifecycle: [Workflow](WORKFLOW.md).
+Independent Active tasks may run on Cursor, Claude, and Codex at the same time.
 
 ## Bootstrap
 
-Human creates product + builder (typical), grants a capable Architect agent access, pastes the root README prompt. The agent initializes or resumes AIOS **in the builder** using Git files only. See [Bootstrap](BOOTSTRAP.md).
+Create a dedicated builder; identify product repo(s); paste the root README prompt. Architect initializes or resumes **in the builder**. See [BOOTSTRAP.md](BOOTSTRAP.md).
 
-The Architect creates missing runtime folders when needed:
+Architect creates missing folders when needed:
 
 ```text
 prompts/
@@ -31,56 +26,31 @@ suggestions/
 memory/
 ```
 
-If those already exist with AIOS state, resume them. Do not overwrite.
-
-Advanced create/adopt when repos are missing, and the empty-builder git sequence, are documented in [Bootstrap](BOOTSTRAP.md) and [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md). They are not the beginner path.
-
 ## QMD / Queue
 
-**QMD** is the human-readable Markdown operational board backed by `queue.md`. Not a hosted service.
+**QMD** (`queue.md`) is the lifecycle/status index — not the source of task meaning.
 
-The Architect owns `queue.md`. The Reviewer updates it after a review.
-
-The Executor does not edit it.
+Architect owns it. Reviewer updates after review. Executor does not edit it.
 
 ```text
 # In Line
 # Active
 # Awaiting Review
-# Completed
 # Blocked
 ```
 
-In the builder/product topology, this file lives in the builder.
-
-## Task Files
+## Task files
 
 ```text
-prompts/NNNN-slug.prompt.md    # written by Architect
-prompts/NNNN-slug.response.md  # written by Executor
-prompts/NNNN-slug.review.md    # written by Reviewer
+prompts/NNNN-slug.prompt.md    # Architect
+prompts/NNNN-slug.response.md  # Executor
+prompts/NNNN-slug.review.md    # Architect/Reviewer
 ```
-
-## Executor Rule
-
-The Executor executes the task and writes the response.
-
-The Executor does not edit `queue.md`.
-
-The Executor changes the product repository only when the task explicitly says so.
-
-## Architect Rule
-
-The Architect plans, documents, creates missing folders, writes tasks, and owns `queue.md` state.
-
-## Reviewer Rule
-
-The Reviewer writes the review and then updates `queue.md` according to the result.
 
 ## Ownership
 
-Builder (or the single AIOS repo) owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, and project knowledge.
+Builder owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, and project knowledge.
 
-The product repository owns application, runtime, and deployment code.
+Product repositories own application, runtime, and deployment code.
 
 `aios-public` stays generic protocol/template source.

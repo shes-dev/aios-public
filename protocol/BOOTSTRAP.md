@@ -1,38 +1,41 @@
 # Bootstrap
 
-AIOS bootstrap initializes or resumes durable Git/Markdown state in a **builder** repository, with a separate **product** repository for implementation. `aios-public` is protocol source only.
+Bootstrap initializes or resumes durable Git/Markdown state in a **dedicated builder repository**. Product repositories hold implementation only. `aios-public` is protocol source.
 
-The root README start prompt is **vendor-agnostic**: any capable Architect agent may run it. **Claude Code** is documented below as one concrete tested example (including sequential Architect → Executor → Reviewer in one session). Claude Code does not define AIOS.
+The root README start prompt is vendor-agnostic. **Claude Code** is one concrete tested example below. Claude Code does not define AIOS.
 
-Bootstrap does not require Cowork, hosted AIOS, AIOS MCP tools, AIOS connection status, the AIOS GitHub App, an artifact store, or any particular Executor vendor.
+Bootstrap does not require Cowork, hosted AIOS, AIOS MCP tools, the AIOS GitHub App, an artifact store, or any particular Executor vendor. AIOS does not launch workers.
 
-This file does not replace [Roles](ROLES.md). Single-repository AIOS remains valid; it is not the default product/builder topology.
-
-## Handoff
+## Topology (mandatory)
 
 ```text
-Human creates <project> and <project>-builder
+one project / workstream  ->  one dedicated builder repo
+one builder repo          ->  one or many product repos
+```
+
+```text
+Human creates builder + names product repo(s)
         ↓
-Human opens a capable Architect agent with access to both
+Human opens a capable Architect with access to builder + products
         ↓
 Human pastes the README start prompt
         ↓
-Agent reads shes-dev/aios-public
+Architect reads shes-dev/aios-public
         ↓
-Agent initializes or resumes AIOS in the builder
+Architect initializes or resumes AIOS in the builder
         ↓
-Agent reports state and asks what to build
+Architect reports state and asks what to build
         ↓
-Architect -> Executor -> Reviewer (any valid staffing)
+prompt -> response -> review (external Executors as staffed)
 ```
 
 | Repository | Role |
 |------------|------|
 | `shes-dev/aios-public` | Protocol source only |
-| `<owner>/<project>-builder` | Durable AIOS workspace (QMD, prompts, suggestions, memory) |
-| `<owner>/<project>` | Product implementation |
+| `<owner>/<project>-builder` | Sole AIOS organizational state |
+| `<owner>/<product>` … | Implementation only |
 
-Default branch name: `main`.
+Default branch: `main`.
 
 Builder remotes (when configured):
 
@@ -41,70 +44,53 @@ origin       -> <BUILDER_REPOSITORY>
 aios-public  -> shes-dev/aios-public
 ```
 
-`aios-public` is never the builder's `origin`. Consumer knowledge does not belong in `aios-public`.
+`aios-public` is never the builder’s `origin`. Consumer knowledge does not belong in `aios-public`.
 
 ## Human setup
 
-Create both repositories before the first bootstrap prompt. Private repositories are supported and are the recommended default example.
+1. Create an empty dedicated builder repository.
+2. Identify one or more product repositories the builder will govern.
+3. Grant the Architect (and later Executors) access to the builder and relevant products.
+4. Paste the root README prompt with builder and product repo names filled in.
 
 ```bash
-gh repo create <owner>/<project> --private
 gh repo create <owner>/<project>-builder --private
+# product repos may already exist; create only when authorized and missing
 ```
 
-Create them empty: no README, license, `.gitignore`, or template.
-
-Then open your chosen Architect agent with normal direct Git/GitHub access to both repositories. Repository access is not provided by AIOS hosted state or the AIOS GitHub App. AIOS does not launch or connect workers.
+Create the builder empty: no README, license, `.gitignore`, or template.
 
 ## Initialize or resume
 
-When the Architect agent receives the start prompt with both repos named:
+When the Architect receives the start prompt:
 
-1. **Work directly with the named builder and product Git repositories.** Do not search for substitutes. Do not create repositories.
-2. **Read the canonical protocol first:** `ROLES.md`, `BOOTSTRAP.md`, `TOPOLOGY.md`, `WORKFLOW.md`, `AGENTS.md`.
-3. **Do not use persistence outside builder Git files for this path.** Hosted AIOS state, AIOS MCP tools, connection-status state, artifact stores, and MCP memory are not canonical here.
+1. **Work with the named builder and product Git repositories.** Do not invent substitutes. Do not create repositories unless the Human already authorized creation.
+2. **Read the protocol first:** `ROLES.md`, `BOOTSTRAP.md`, `TOPOLOGY.md`, `WORKFLOW.md`, `AGENTS.md`.
+3. **Persist only in builder Git files** for this path (not hosted AIOS / MCP artifact stores as canonical state).
 4. **If the builder has no AIOS state**:
-   - configure `main` and the protocol relationship as needed;
+   - configure `main` and the protocol remote as needed;
    - create missing `queue.md`, `prompts/`, `suggestions/`, and `memory/`;
-   - write `memory/product-pairing.md` (or equivalent durable baseline) naming product, builder, and protocol source;
-   - commit and push normal builder initialization when the Human's start prompt authorizes it;
-   - do not modify the product;
-   - stop before task `0001`, report the resulting state, and ask what the product is / what to build.
-5. **If the builder already has AIOS state**:
-   - resume it;
-   - do **not** overwrite or reinitialize `queue.md`, `prompts/`, reviews, `suggestions/`, or `memory/`;
-   - update pairing only if missing or clearly stale, without erasing durable history;
-   - report current AIOS state and continue from the existing queue.
-6. **Product history is sacred.** Never force-push, rewrite, or replace an existing product. Empty/new products stay empty until a real task explicitly authorizes implementation.
-7. **Persistence is Git in the builder.** `queue.md` (QMD), task prompts, responses, reviews, suggestions, and memory are the durable organizational state.
+   - write `memory/product-pairing.md` naming builder, product repo(s), and protocol source;
+   - commit and push when the start prompt authorizes it;
+   - do not modify products;
+   - stop before task `0001`, report state, ask what to build.
+5. **If the builder already has AIOS state**: resume; do not overwrite queue, prompts, reviews, suggestions, or memory.
+6. **Product history is sacred.** Never force-push or replace an existing product.
+7. **Artifact contract:** Architect writes `.prompt.md` and owns QMD; Executors write `.response.md`; Architect/Reviewer writes `.review.md`.
 
 ## Ownership
 
 Builder owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, and all task/response/review files.
 
-Product owns application, runtime, and deployment code.
-
-Role staffing follows [Roles](ROLES.md). One session may play Architect, Executor, and Reviewer sequentially; multiple external Executors may take independent Active tasks. Role boundaries and artifacts remain mandatory.
+Products own application, runtime, and deployment code.
 
 ## Human-only boundaries
 
-The Human must:
+The Human must create/select the builder, identify product repo(s), grant access, paste the start prompt, and approve risky/external operations.
 
-1. Create the product repository (typical beginner path).
-2. Create the matching builder repository.
-3. Give the chosen tools access to both.
-4. Paste the root README start prompt with both repo names filled in.
-5. Make product decisions and approve risky/external operations.
+The README prompt may authorize normal builder init commits/pushes. Agents must still stop before force-push, deploy/publish, deleting repos, exposing secrets, or other irreversible/external actions. See [ROLES.md](ROLES.md).
 
-The README prompt may explicitly authorize normal builder initialization commits and pushes so the Architect agent does not stop for a redundant approval before the first builder push.
-
-Agents must still stop before force-push/history rewrite, deployment/publication, deleting repositories, exposing secrets, or other risky/irreversible/external actions. See [Roles](ROLES.md).
-
-If the agent cannot access a named repo, ask only for normal Git/GitHub access to that repo. Do not redirect the beginner to hosted AIOS or create a differently named substitute.
-
-## Expected successful new-builder state
-
-After initialization, a new builder should contain or expose the equivalent of:
+## Expected new-builder state
 
 ```text
 queue.md
@@ -115,52 +101,35 @@ memory/product-pairing.md
 protocol/
 ```
 
-Expected Git state:
-
-- builder branch `main` exists and tracks `origin/main`;
-- `origin` points to the builder;
-- when configured, secondary `aios-public` points to `shes-dev/aios-public`;
-- product repository remains untouched until a later task authorizes implementation.
+- builder `main` tracks `origin/main`;
+- `origin` points at the builder;
+- secondary `aios-public` points at `shes-dev/aios-public` when configured;
+- product repos remain untouched until a task authorizes implementation.
 
 ## Tested example: Claude Code
 
-Claude Code is a validated concrete path:
-
-1. Human creates product + builder as above.
-2. Human opens Claude Code with direct Git/GitHub access to both.
-3. Human pastes the root README prompt (same vendor-agnostic text).
+1. Human creates builder and identifies product repo(s).
+2. Human opens Claude Code with Git/GitHub access to builder + products.
+3. Human pastes the root README prompt.
 4. Claude Code may act sequentially as Architect → Executor → Reviewer while preserving separate artifacts.
-5. Claude Code must not use hosted AIOS / MCP / artifact-store persistence as canonical state for this path.
-
-This example does not privilege Claude as the conceptual architecture of AIOS.
+5. Do not use hosted AIOS / MCP persistence as canonical state for this path.
 
 ## Advanced: adopt / create when repos are missing
 
-Not part of the beginner path. Kept for operators who need discovery or creation.
-
-Inspect first. Create only when missing **and** the Human has authorized repository creation. Never create a second copy of something that already exists.
+Not the beginner path. Inspect first. Create only when missing **and** authorized. Never create a second copy of something that exists.
 
 | Product | Matching builder | Action |
 |---------|------------------|--------|
-| Exists | Exists | Adopt the product. Reuse the builder. Create neither. |
-| Exists | Missing, creation authorized | Adopt the product. Create `<product-repo-name>-builder`. |
-| Exists | Missing, not authorized | Adopt the product read-only. Stop for Human. |
-| Missing, creation authorized | Matching builder | Reuse the builder. Create/initialize the product. |
-| Missing, creation authorized | Missing, creation authorized | Create both. Pair them. |
-| Missing, not authorized | Any | Stop. Do not invent the product. |
-
-Matching-builder evidence (when the Human did not name the builder): Human identity -> `<product>-builder` name -> `memory/` pairing -> AIOS artifacts -> `aios-public` remote -> description. Ambiguous matches: stop and ask.
+| Exists | Exists | Adopt product(s). Reuse builder. Create neither. |
+| Exists | Missing, creation authorized | Adopt product(s). Create `<name>-builder`. |
+| Exists | Missing, not authorized | Stop for Human. |
+| Missing, creation authorized | Matching builder | Reuse builder. Create/initialize product only if authorized. |
+| Missing, not authorized | Any | Stop. |
 
 Empty-builder git sequence: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md).
 
 ## Stop (after init/resume)
 
-Bootstrap handoff is done when:
+Done when the named builder has AIOS runtime files, pairing is under `memory/`, products were not rewritten, and the Architect asked what to build before task `0001`.
 
-- the named product and builder are in use;
-- the builder has AIOS runtime files (new or resumed);
-- pairing is recorded under builder `memory/`;
-- product history was not rewritten;
-- the Architect agent has reported state and asked the Human what to build before creating the first real task.
-
-Then continue the knowledge lifecycle in [Workflow](WORKFLOW.md).
+Then: [WORKFLOW.md](WORKFLOW.md).

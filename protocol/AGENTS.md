@@ -44,7 +44,7 @@ The Reviewer (often the Architect in a distinct phase):
 
 1. Judges the response against the prompt.
 2. Writes `prompts/NNNN-slug.review.md`.
-3. Updates `queue.md`.
+3. Removes the task from `queue.md` and appends its ID to `COMPLETED.md` (the triplet is now complete).
 
 ```text
 review 0001
@@ -55,9 +55,10 @@ review 0001
 Example under one Architect context:
 
 ```text
-0394 -> Cursor
-0395 -> Claude
-0396 -> Codex
+QMD
+0371 -> Cursor
+0372 -> Claude
+0373 -> Codex
 ```
 
 AIOS does not schedule or supervise those workers.
@@ -74,11 +75,12 @@ The Human owns vision and risky/external approvals; creates the dedicated builde
 
 | File | Writer | Purpose |
 |------|--------|---------|
-| `queue.md` | Architect; Reviewer after review | QMD lifecycle index |
+| `queue.md` | Architect; Reviewer after review | QMD: live work only |
+| `BLOCKED.md` / `COMPLETED.md` / `DELETED.md` | Architect; Reviewer after review | Task IDs moved out of QMD |
 | `prompts/*.prompt.md` | Architect | Approved task meaning |
 | `prompts/*.response.md` | Executor | Evidence |
 | `prompts/*.review.md` | Architect/Reviewer | Verdict |
-| `suggestions/` | Architect | Pre-task thinking |
-| `memory/` | Architect | Pairing and durable decisions |
+| `suggestions/` | Architect | Documented ideas that may be promoted to tasks |
+| `memory/` | Architect | How we work and product facts; never promoted to tasks |
 
 These files live in the **builder**, never as the supported home inside a product repository.

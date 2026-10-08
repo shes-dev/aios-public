@@ -174,7 +174,7 @@ After initialization files exist in the builder:
 2. **Human:** pull the builder locally if needed, then tell the Executor `execute 0001` (or the applicable task id).
 3. **Executor:** do the work. Modify the product repository only when that task explicitly says so. Write `prompts/0001-*.response.md` in the builder. Do not edit `queue.md`.
 4. **Human:** commit and push the builder (and the product, if the task changed it).
-5. **Reviewer:** review, write `prompts/0001-*.review.md`, and update builder `queue.md`.
+5. **Reviewer:** review, write `prompts/0001-*.review.md`, then move 0001 from builder `queue.md` to `COMPLETED.md` (its triplet is complete).
 
 This is the normal loop: `Talk -> Document -> Task -> Execute -> Review -> Done`.
 

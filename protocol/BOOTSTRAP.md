@@ -80,7 +80,7 @@ When the Architect receives the start prompt:
 
 ## Ownership
 
-Builder owns `queue.md`, `prompts/`, `suggestions/`, `memory/`, and all task/response/review files.
+Builder owns `queue.md`, `BLOCKED.md` / `COMPLETED.md` / `DELETED.md` (created when first needed), `prompts/`, `suggestions/`, `memory/`, and all task/response/review files.
 
 Products own application, runtime, and deployment code.
 

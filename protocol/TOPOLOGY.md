@@ -46,10 +46,11 @@ The Human typically creates the builder and names the product repo(s). An Archit
 
 The **builder** owns:
 
-- `queue.md` (QMD lifecycle index)
+- `queue.md` (QMD: live work only)
+- `BLOCKED.md`, `COMPLETED.md`, `DELETED.md` (task IDs moved out of QMD)
 - `prompts/` (`.prompt.md` / `.response.md` / `.review.md`)
-- `suggestions/`
-- `memory/`
+- `suggestions/` (ideas that may be promoted to tasks)
+- `memory/` (how we work and product facts; never promoted)
 - cross-repo decisions and evidence
 
 Each **product** repository owns:
@@ -103,6 +104,6 @@ Roles: [Roles](ROLES.md). AIOS does not launch or connect tools.
 1. Architect creates numbered `.prompt.md` files in the builder and updates `queue.md`.
 2. Independent Active tasks may go to different external Executors in parallel (e.g. Cursor / Claude / Codex).
 3. Each Executor changes product repos only if its task says so, and writes its `.response.md` in the builder.
-4. Architect/Reviewer writes each `.review.md` and updates QMD.
+4. Architect/Reviewer writes each `.review.md`, then moves the completed task from QMD to `COMPLETED.md`.
 
 Empty-builder git sequence: [Existing-project initialization](examples/INIT_EXISTING_PROJECT.prompt.example.md). Run [Bootstrap](BOOTSTRAP.md) first.

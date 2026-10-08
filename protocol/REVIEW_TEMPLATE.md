@@ -1,6 +1,6 @@
 # Review — Task NNNN
 
-Verdict: Accept | Rework | Block
+Verdict: Accept | Rework
 
 ## Summary
 
@@ -12,8 +12,7 @@ What was reviewed and the result.
 
 ## Queue Update
 
-The Reviewer updates `queue.md` after this review.
+With this review the task's triplet (prompt, response, review) is complete. The Reviewer removes the task from `queue.md` and appends its ID to `COMPLETED.md`.
 
-- [ ] Move to Completed
-- [ ] Create rework task
-- [ ] Move to Blocked
+- [ ] Moved from `queue.md` to `COMPLETED.md`
+- [ ] Rework: new task created that refers to this review

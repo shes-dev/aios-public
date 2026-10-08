@@ -16,7 +16,12 @@ Architect
 
 Independent Active prompts may run in parallel on different Executors. AIOS does not launch those workers.
 
-## Suggestions (secondary context)
+## Suggestions vs Memory
+
+- **Suggestion** (`suggestions/`): an idea, proposal, or finding documented now that **may be promoted to a task** later. Its outcome is recorded: open, promoted (to task NNNN), or declined.
+- **Memory** (`memory/`): general metadata on how to work on the project, and facts about the product (pairing, conventions, decisions, glossary). It is reference context, updated in place, and **never promoted to a task**.
+
+If it might turn into work, write a Suggestion. If every future task should know it, write Memory.
 
 Before engineering work:
 
@@ -40,12 +45,21 @@ Suggestions are first-class pre-task thinking. They must not replace the prompt/
 # In Line
 # Active
 # Awaiting Review
-# Blocked
 ```
 
-Accepted history moves to `COMPLETED.md` when used; paused work may live in `BACKLOG.md`. QMD is **not** the store of task meaning — that is the `.prompt.md`.
+Keep QMD lean. Anything that is no longer live moves to a designated file in the builder, so QMD never grows with history:
 
-Architect owns `queue.md`. Reviewer updates it after review. Executor never edits `queue.md`, `COMPLETED.md`, or `BACKLOG.md` during normal execution.
+| File | Holds | Moved there when |
+|------|-------|------------------|
+| `BLOCKED.md` | Task ID + reason | The task cannot proceed |
+| `COMPLETED.md` | Task ID | The triplet is finished |
+| `DELETED.md` | Task ID + reason | The task is dropped without completion |
+
+A task is **complete once it has all three artifacts**: `prompts/NNNN-slug.prompt.md`, `prompts/NNNN-slug.response.md`, and `prompts/NNNN-slug.review.md`. After writing the review, the Reviewer removes the ID from `queue.md` and appends it to `COMPLETED.md`. Completed tasks are not tracked in QMD; the artifacts are the record. A blocked task returns to QMD when it can proceed.
+
+QMD is **not** the store of task meaning — that is the `.prompt.md`.
+
+Architect owns `queue.md` and the three archive files. Reviewer updates them after review. Executor never edits them during normal execution.
 
 ## Topology invariant
 
@@ -77,14 +91,14 @@ ChatGPT as Architect/Reviewer; Cursor / Claude / Codex as Executors:
 3. Architect writes `prompts/NNNN-slug.prompt.md` and registers the id on QMD.
 4. Independent Active tasks may be handed to different external Executors.
 5. Each Executor writes `prompts/NNNN-slug.response.md` (and product changes only if authorized).
-6. Architect/Reviewer writes `prompts/NNNN-slug.review.md` and updates QMD.
+6. Architect/Reviewer writes `prompts/NNNN-slug.review.md`, removes the ID from QMD, and appends it to `COMPLETED.md`.
 7. Accepted outcomes advance knowledge; follow-ups become new prompts.
 
 When tools do not share a workspace, sync Git (or another transport) so each role sees the artifacts. That transport is not AIOS orchestration.
 
 ## Rework
 
-If review rejects or requests more work, the Architect creates a new prompt that refers to the review. The Executor still hears only:
+A Rework verdict still completes the reviewed task: its triplet exists, so it moves to `COMPLETED.md`. The Architect creates a new prompt that refers to the review. The Executor still hears only:
 
 ```text
 execute NNNN

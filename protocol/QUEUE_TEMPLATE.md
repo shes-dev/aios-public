@@ -1,13 +1,8 @@
 <!-- Architect owns this file (QMD). Reviewer updates it after a review. Executor must not edit it. -->
-<!-- Operational queue / task board only — not a hosted service. Accepted history belongs in COMPLETED.md; stale/paused work may live in BACKLOG.md. -->
+<!-- Live work only. Blocked, completed and deleted task IDs move to BLOCKED.md, COMPLETED.md and DELETED.md to keep QMD lean. -->
 
 # In Line
 
 # Active
 
 # Awaiting Review
-
-# Blocked
-
-# Completed
-See [COMPLETED.md](COMPLETED.md).

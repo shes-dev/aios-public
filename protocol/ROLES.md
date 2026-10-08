@@ -14,9 +14,9 @@ ChatGPT is one current Architect example. A single capable session may still pla
 
 | Role | Authority | Writes |
 |------|-----------|--------|
-| **Architect** | Holds intent; decomposes work; decides which tasks proceed; owns QMD; receives responses; performs/commissions review; promotes knowledge; may coordinate multiple independent Executors | `prompts/*.prompt.md`, `prompts/*.review.md` (when acting as Reviewer), `suggestions/`, `memory/`, `queue.md` |
+| **Architect** | Holds intent; decomposes work; decides which tasks proceed; owns QMD; receives responses; performs/commissions review; promotes knowledge; may coordinate multiple independent Executors | `prompts/*.prompt.md`, `prompts/*.review.md` (when acting as Reviewer), `suggestions/`, `memory/`, `queue.md`, `BLOCKED.md` / `COMPLETED.md` / `DELETED.md` |
 | **Executor** | Executes one approved/Active task; does not edit QMD or write the review for that task | `prompts/*.response.md` and product changes the task allows |
-| **Reviewer** | Judges execution against the prompt (often the same person/session as Architect, as a distinct phase) | `prompts/*.review.md`, then `queue.md` |
+| **Reviewer** | Judges execution against the prompt (often the same person/session as Architect, as a distinct phase) | `prompts/*.review.md`, then `queue.md` and `COMPLETED.md` |
 
 AIOS does not launch, schedule, route, or monitor Executors. Coordination is Architect decisions + Git/Markdown artifacts + QMD + external execution + review.
 
@@ -26,19 +26,20 @@ AIOS does not launch, schedule, route, or monitor Executors. Coordination is Arc
 prompts/NNNN-slug.prompt.md     # Architect — approved work
 prompts/NNNN-slug.response.md   # Executor — evidence
 prompts/NNNN-slug.review.md     # Architect/Reviewer — verdict
-queue.md                        # Architect/Reviewer — lifecycle index only
+queue.md                        # Architect/Reviewer — live lifecycle index only
 ```
 
-Task meaning lives in the prompt, not in QMD.
+Task meaning lives in the prompt, not in QMD. A task is complete once all three artifacts exist; it then leaves QMD for `COMPLETED.md`.
 
 ## Parallel Executors
 
 Independent Active tasks may run concurrently:
 
 ```text
-0394 -> Cursor
-0395 -> Claude
-0396 -> Codex
+QMD
+0371 -> Cursor
+0372 -> Claude
+0373 -> Codex
 ```
 
 Each Executor reads only its prompt and writes only its response. Agents need not message each other.

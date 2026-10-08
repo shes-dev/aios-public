@@ -1,6 +1,6 @@
 # AIOS
 
-AIOS is a **vendor-agnostic protocol** for humans and AI agents collaborating on long-lived engineering work. It preserves thinking, execution evidence, review, and knowledge as durable Git and Markdown artifacts — not as disposable chat.
+AIOS (**AI Operating System**) is a **vendor-agnostic protocol** for humans and AI agents collaborating on long-lived engineering work. It preserves thinking, execution evidence, review, and knowledge as durable Git and Markdown artifacts — not as disposable chat.
 
 > **AI agents are workers. The protocol is the organization.**
 
@@ -20,6 +20,12 @@ Architect
   -> next task / knowledge
 ```
 
+In one line:
+
+```text
+TASK -> IMPLEMENT -> REVIEW -> KNOWLEDGE
+```
+
 | Artifact | Writer | Meaning |
 |----------|--------|---------|
 | `.prompt.md` | Architect | What is approved to do |
@@ -29,10 +35,10 @@ Architect
 Different prompt artifacts can be **Active at the same time** with different Executors:
 
 ```text
-# Active (illustrative)
-0394  fix auth redirect     → Cursor
-0395  draft onboarding copy → Claude
-0396  explore billing API   → Codex
+QMD
+0371 → Cursor
+0372 → Claude
+0373 → Codex
 ```
 
 Each Executor consumes only its approved prompt and writes the matching response. Executors do not talk to each other through AIOS. The Architect closes each loop through the matching review.
@@ -100,9 +106,21 @@ ChatGPT is one current Architect example. The role is vendor-independent. The Ar
 - Task meaning → `.prompt.md`
 - Implementation evidence → `.response.md`
 - Review verdict → `.review.md`
-- Status (In Line / Active / Awaiting Review / Blocked) → `queue.md`
+- Live status (In Line / Active / Awaiting Review) → `queue.md`
 
 Architect / Reviewer own QMD transitions. Executors do not edit `queue.md`.
+
+### Keep QMD lean
+
+QMD lists **live work only**. Terminal and parked tasks would make it grow forever, so they move out to designated files in the builder:
+
+| File | Holds |
+|------|-------|
+| `BLOCKED.md` | Task IDs that cannot proceed, with the reason |
+| `COMPLETED.md` | Task IDs whose triplet is finished |
+| `DELETED.md` | Task IDs dropped without completion |
+
+A task is **complete once it has all three artifacts**: `.prompt.md`, `.response.md`, and `.review.md`. There is no reason to keep tracking it in QMD: the Reviewer removes it from `queue.md` and appends its ID to `COMPLETED.md`. The artifacts themselves remain the record.
 
 ## Builder artifact layout
 
@@ -111,6 +129,9 @@ Canonical public paths (flat `prompts/` files):
 ```text
 my-project-builder/
   queue.md
+  BLOCKED.md      (when needed)
+  COMPLETED.md    (when needed)
+  DELETED.md      (when needed)
   prompts/
     0001-fix-auth.prompt.md
     0001-fix-auth.response.md
@@ -123,13 +144,26 @@ my-project-builder/
 ```
 
 - `queue.md` — which tasks are live and in which lifecycle state
+- `BLOCKED.md` / `COMPLETED.md` / `DELETED.md` — task IDs moved out of QMD
 - `prompts/NNNN-slug.prompt.md` — Architect’s approved task
 - `prompts/NNNN-slug.response.md` — Executor’s evidence
 - `prompts/NNNN-slug.review.md` — Architect/Reviewer verdict
-- `suggestions/` — pre-task product/organizational thinking
-- `memory/` — durable pairing and decisions
+- `suggestions/` — documented ideas that may be promoted to tasks
+- `memory/` — how we work on this project, and facts about the product; never promoted to tasks
 
-## Suggestions (before engineering work)
+## Suggestions vs Memory
+
+Both are durable Markdown the Architect writes in the builder. They differ in where they can lead.
+
+| | Suggestion | Memory |
+|---|------------|--------|
+| What it is | An idea, proposal, or finding documented now | General metadata on how to work on the project, and facts about the product |
+| Examples | “Add SSO to the admin app”, “Split the billing service” | Builder/product pairing, conventions, past decisions, domain glossary |
+| Can become a task? | **Yes.** It may be promoted to a `.prompt.md` | **No.** It is never promoted |
+| Lifecycle | Open → promoted (to task NNNN) or declined | None; updated in place as things change |
+| Lives in | `suggestions/` | `memory/` |
+
+Rule of thumb: if it might turn into work, it is a Suggestion. If it is context every future task should know, it is Memory.
 
 Suggestions record ideas before they become engineering tasks:
 
@@ -176,6 +210,11 @@ Preserve the artifact contract:
 - Architect writes prompts/NNNN-slug.prompt.md and owns queue.md (QMD lifecycle index).
 - External Executors write matching .response.md only; they do not edit queue.md.
 - Architect/Reviewer writes matching .review.md, then updates queue.md.
+- queue.md lists live work only (In Line / Active / Awaiting Review). Blocked,
+  completed and deleted task IDs move to BLOCKED.md / COMPLETED.md / DELETED.md.
+  A task is complete once its prompt, response and review all exist.
+- suggestions/ holds ideas that may be promoted to tasks; memory/ holds how we
+  work and product facts, and is never promoted to a task.
 
 One builder may span one or many product repos. Do not embed AIOS state in a product repo.
 Do not assume AIOS launches or controls workers.
